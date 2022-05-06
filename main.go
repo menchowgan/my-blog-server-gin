@@ -6,30 +6,68 @@ import (
 
 	"github.com/gin-gonic/gin"
 
+	person "gmc-blog-server/api/Person"
+	"gmc-blog-server/db"
+	"gmc-blog-server/model"
 	router "gmc-blog-server/router"
-
-	model "gmc-blog-server/model"
 )
 
 func main() {
 	fmt.Println("GMC BLOG")
 	r := gin.Default()
 
-	router.Get(r, "/hello", func(ctx *gin.Context) {
+	err := db.InitDB()
+
+	if err != nil {
+		panic(err)
+	}
+
+	initTables()
+
+	router.Get(r, "/hello", func(ctx *gin.Context) error {
 		ctx.JSON(http.StatusOK, gin.H{
 			"message": "gmc",
 		})
+		return nil
 	})
 
-	router.Post(r, "/hello", func(c *gin.Context) {
-		var person model.PersonInfoModel
+	groupMap := router.GroupStruct{
+		Group: router.GroupMap{
+			"/user": {
+				Url:     "/person-info-post",
+				Method:  "post",
+				Handler: person.PersonInfoPost,
+			}},
+	}
 
-		if err := c.ShouldBind(&person); err != nil {
-			c.JSON(400, gin.H{
-				"msg": err,
-			})
-		}
+	router.Group(r, groupMap)
+
+	r.NoRoute(func(ctx *gin.Context) {
+		fmt.Println("------no route")
+		ctx.JSON(http.StatusNotFound, gin.H{
+			"message": "陆游不存在",
+		})
 	})
 
 	r.Run(":8888")
+}
+
+func initTables() {
+	dw := db.DB.GetDbW()
+	dr := db.DB.GetDbR()
+
+	defer db.DB.DbRClose()
+	defer db.DB.DbWClose()
+
+	has := dr.Migrator().HasTable(&model.User{})
+
+	if has {
+		return
+	}
+
+	err := dw.AutoMigrate(&model.User{})
+	if err == nil {
+		return
+	}
+	panic(err)
 }
