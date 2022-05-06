@@ -7,8 +7,8 @@ import (
 	"github.com/gin-gonic/gin"
 
 	person "gmc-blog-server/api/Person"
-	"gmc-blog-server/db"
-	"gmc-blog-server/model"
+	db "gmc-blog-server/db"
+	model "gmc-blog-server/model"
 	router "gmc-blog-server/router"
 )
 
@@ -35,7 +35,7 @@ func main() {
 		Group: router.GroupMap{
 			"/user": {{
 				Url:     "/person-info-post",
-				Method:  "post",
+				Method:  http.MethodPost,
 				Handler: person.PersonInfoPost,
 			}}},
 	}

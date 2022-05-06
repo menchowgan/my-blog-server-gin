@@ -2,6 +2,7 @@ package router
 
 import (
 	errhandler "gmc-blog-server/errHandler"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
@@ -22,11 +23,11 @@ func Group(r *gin.Engine, groupMap GroupStruct) {
 		{
 			for _, route := range group {
 				switch route.Method {
-				case "get":
+				case http.MethodGet:
 					get(routerGroup, route.Url, route.Handler)
-				case "post":
+				case http.MethodPost:
 					post(routerGroup, route.Url, route.Handler)
-				case "put":
+				case http.MethodPut:
 					put(routerGroup, route.Url, route.Handler)
 				}
 			}
