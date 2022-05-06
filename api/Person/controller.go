@@ -1,7 +1,6 @@
 package person
 
 import (
-	"fmt"
 	model "gmc-blog-server/model"
 	"net/http"
 
@@ -14,8 +13,8 @@ func PersonInfoPost(c *gin.Context) error {
 	if err := c.ShouldBind(&person); err != nil {
 		return err
 	}
-	fmt.Println(person)
-	fmt.Printf("nickname: %s, gender: %s, brief: %s", person.Nickname, person.Gender, person.Brief)
+
+	//todo
 
 	c.JSON(http.StatusOK, gin.H{
 		"message": "接受成功",
