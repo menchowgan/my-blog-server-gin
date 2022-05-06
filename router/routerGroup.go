@@ -6,7 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type GroupMap map[string]struct {
+type GroupMap map[string][]struct {
 	Url     string
 	Method  string
 	Handler Handler
@@ -17,16 +17,18 @@ type GroupStruct struct {
 }
 
 func Group(r *gin.Engine, groupMap GroupStruct) {
-	routerGroup := r.Group("/user")
-	{
-		for _, v := range groupMap.Group {
-			switch v.Method {
-			case "get":
-				get(routerGroup, v.Url, v.Handler)
-			case "post":
-				post(routerGroup, v.Url, v.Handler)
-			case "put":
-				put(routerGroup, v.Url, v.Handler)
+	for key, group := range groupMap.Group {
+		routerGroup := r.Group(key)
+		{
+			for _, route := range group {
+				switch route.Method {
+				case "get":
+					get(routerGroup, route.Url, route.Handler)
+				case "post":
+					post(routerGroup, route.Url, route.Handler)
+				case "put":
+					put(routerGroup, route.Url, route.Handler)
+				}
 			}
 		}
 	}

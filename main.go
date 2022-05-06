@@ -33,11 +33,11 @@ func main() {
 
 	groupMap := router.GroupStruct{
 		Group: router.GroupMap{
-			"/user": {
+			"/user": {{
 				Url:     "/person-info-post",
 				Method:  "post",
 				Handler: person.PersonInfoPost,
-			}},
+			}}},
 	}
 
 	router.Group(r, groupMap)

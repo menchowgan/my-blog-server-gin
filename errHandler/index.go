@@ -15,17 +15,17 @@ func Handle(err error, c *gin.Context) {
 	case os.IsNotExist(err):
 		code = http.StatusNotFound
 		c.JSON(code, gin.H{
-			"message": "没找到该访问方式",
+			"message": err.Error(),
 		})
 	case os.IsPermission(err):
 		code = http.StatusForbidden
 		c.JSON(code, gin.H{
-			"message": "您没有权限",
+			"message": err.Error(),
 		})
 	default:
 		code = http.StatusInternalServerError
 		c.JSON(code, gin.H{
-			"message": "系统内部错误",
+			"message": err.Error(),
 		})
 	}
 }
