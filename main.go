@@ -13,7 +13,6 @@ import (
 )
 
 func main() {
-	fmt.Println("GMC BLOG")
 	r := gin.Default()
 
 	err := db.InitDB()
@@ -26,7 +25,7 @@ func main() {
 
 	router.Get(r, "/hello", func(ctx *gin.Context) error {
 		ctx.JSON(http.StatusOK, gin.H{
-			"message": "gmc",
+			"message": ctx.Request.Header,
 		})
 		return nil
 	})
@@ -56,8 +55,10 @@ func initTables() {
 	dw := db.DB.GetDbW()
 	dr := db.DB.GetDbR()
 
-	defer db.DB.DbRClose()
-	defer db.DB.DbWClose()
+	defer func() {
+		db.DB.DbRClose()
+		db.DB.DbWClose()
+	}()
 
 	has := dr.Migrator().HasTable(&model.User{})
 
