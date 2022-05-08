@@ -24,6 +24,12 @@ func Handle(err error, c *gin.Context) {
 			"code":    code,
 			"message": err.Error(),
 		})
+	case os.IsTimeout(err):
+		code = http.StatusRequestTimeout
+		c.JSON(code, gin.H{
+			"code":    code,
+			"message": err.Error(),
+		})
 	default:
 		code = http.StatusInternalServerError
 		c.JSON(code, gin.H{

@@ -1,20 +1,9 @@
 package model
 
-type PersonInfoModel struct {
-	ID                  int64                    `json:"id"`
-	Nickname            string                   `json:"nickname"`
-	Gender              string                   `json:"gender"`
-	Hobbies             string                   `json:"hobbies"`
-	Fans                int                      `json:"fans"`
-	Evaluate            int                      `json:"evaluate"`
-	Brief               string                   `json:"brief"`
-	Avatar              string                   `json:"avatar"`
-	Photos              string                   `json:"photos"`
-	ArticleSimplaeInfos []ArticleSimpleInfoModel `json:"articleSimplaeInfos"`
-}
+import "gorm.io/gorm"
 
 type User struct {
-	ID       int64  `gorm:"column:id;not null;type:int(4) primary key auto_increment;comment:'用户id'"`
+	gorm.Model
 	Nickname string `gorm:"column:nickname;type:string;comment:'昵称'"`
 	Hobbies  string `gorm:"column:hobbies;type:string;comment:'兴趣'"`
 	Gender   string `gorm:"column:gender;type:varchar(1);comment:'性别'"`

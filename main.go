@@ -7,6 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	person "gmc-blog-server/api/Person"
+	photos "gmc-blog-server/api/Photos"
 	db "gmc-blog-server/db"
 	model "gmc-blog-server/model"
 	router "gmc-blog-server/router"
@@ -23,6 +24,14 @@ func main() {
 
 	initTables()
 
+	defer func() {
+		db.DB.DbRClose()
+		db.DB.DbWClose()
+		if err := recover(); err != nil {
+			panic(err)
+		}
+	}()
+
 	router.Get(r, "/hello", func(ctx *gin.Context) error {
 		ctx.JSON(http.StatusOK, gin.H{
 			"message": ctx.Request.Header,
@@ -32,11 +41,29 @@ func main() {
 
 	groupMap := router.GroupStruct{
 		Group: router.GroupMap{
-			"/user": {{
-				Url:     "/person-info-post",
-				Method:  http.MethodPost,
-				Handler: person.PersonInfoPost,
-			}}},
+			"/user": {
+				{
+					Url:     "/person-info-post",
+					Method:  http.MethodPost,
+					Handler: person.PersonInfoPost,
+				}, {
+					Url:     "/get-user-simple-info/:id",
+					Method:  http.MethodGet,
+					Handler: person.GerUserSimpleInfo,
+				}, {
+					Url:     "/search-user-brief/:id",
+					Method:  http.MethodGet,
+					Handler: person.GerUserBriefInfo,
+				},
+			},
+			"/photo": {
+				{
+					Url:     "/avatar/upload",
+					Method:  http.MethodPost,
+					Handler: photos.AvatarUpload,
+				},
+			},
+		},
 	}
 
 	router.Group(r, groupMap)
@@ -55,20 +82,34 @@ func initTables() {
 	dw := db.DB.GetDbW()
 	dr := db.DB.GetDbR()
 
-	defer func() {
-		db.DB.DbRClose()
-		db.DB.DbWClose()
-	}()
-
+	var err error
 	has := dr.Migrator().HasTable(&model.User{})
 
-	if has {
-		return
+	if !has {
+		err = dw.AutoMigrate(&model.User{})
 	}
 
-	err := dw.AutoMigrate(&model.User{})
-	if err == nil {
-		return
+	if err != nil {
+		panic(err)
 	}
-	panic(err)
+
+	has = dr.Migrator().HasTable(&model.Articles{})
+
+	if !has {
+		err = dw.AutoMigrate(&model.Articles{})
+	}
+
+	if err != nil {
+		panic(err)
+	}
+
+	has = dr.Migrator().HasTable(&model.Photos{})
+
+	if !has {
+		err = dw.AutoMigrate(&model.Photos{})
+	}
+
+	if err != nil {
+		panic(err)
+	}
 }
