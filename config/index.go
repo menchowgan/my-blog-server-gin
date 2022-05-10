@@ -7,6 +7,6 @@ const (
 	PASSWORD        = "menchowgan"
 	DATABASE_NAME   = "gmc_blog"
 
-	AVATAR_PATH = "http://localhost/"
-	PHOTO_PATH  = "./images/"
+	PHOTO_QUERY_PATH = "http://localhost/"
+	PHOTO_PATH       = "/usr/local/share/images/"
 )

@@ -4,7 +4,10 @@ import (
 	"gmc-blog-server/config"
 	"gmc-blog-server/db"
 	"gmc-blog-server/model"
+	photos "gmc-blog-server/view/Photos"
 	"log"
+	"strconv"
+	"strings"
 )
 
 func InsertUser(user model.User) (uint, error) {
@@ -20,27 +23,54 @@ func InsertUser(user model.User) (uint, error) {
 	return 0, err
 }
 
-func GerUserInfo(id string) PsersonSimpleIinfo {
+func GerUserInfo(id string) (PsersonSimpleIinfo, error) {
 	var user model.User
+	var photo model.Photos
 	dr := db.DB.GetDbR()
 
-	dr.Where("id = ?", id).First(&user)
+	err := dr.Select("id, nickname, fans, avatar").Where("id = ?", id).First(&user).Error
+	if err != nil {
+		return PsersonSimpleIinfo{}, err
+	}
+	log.Println("user info: ", user)
+
+	photo, err = photos.PhotosQueryByUserId(id)
+	if err != nil {
+		return PsersonSimpleIinfo{}, err
+	}
+
+	imgUrls := []photos.PhotoInfo{}
+
+	if photo.ImgUrls != "" && len(photo.ImgUrls) > 0 {
+		urls := strings.Split(photo.ImgUrls, ";")
+		for _, url := range urls {
+			model := photos.PhotoInfo{
+				ID:  photo.ID,
+				Url: config.PHOTO_QUERY_PATH + id + "/" + url,
+			}
+			imgUrls = append(imgUrls, model)
+		}
+	}
 
 	u := PsersonSimpleIinfo{
 		ID:       user.ID,
 		Nickname: user.Nickname,
 		Fans:     user.Fans,
-		Avatar:   config.AVATAR_PATH + user.Avatar,
+		Photos:   imgUrls,
+		Avatar:   config.PHOTO_QUERY_PATH + strconv.Itoa(int(user.ID)) + "/" + user.Avatar,
 	}
 
-	return u
+	return u, nil
 }
 
-func SearchUserBrief(id string) PersonInfoModel {
+func SearchUserBrief(id string) (PersonInfoModel, error) {
 	var user model.User
 	dr := db.DB.GetDbR()
 
-	dr.Where("id = ?", id).First(&user)
+	err := dr.Where("id = ?", id).First(&user).Error
+	if err != nil {
+		return PersonInfoModel{}, err
+	}
 
 	u := PersonInfoModel{
 		ID:       user.ID,
@@ -49,9 +79,9 @@ func SearchUserBrief(id string) PersonInfoModel {
 		Fans:     user.Fans,
 		Brief:    user.Brief,
 		Hobbies:  user.Hobbies,
-		Avatar:   config.AVATAR_PATH + user.Avatar,
+		Avatar:   config.PHOTO_QUERY_PATH + strconv.Itoa(int(user.ID)) + "/" + user.Avatar,
 	}
 
-	return u
+	return u, nil
 
 }

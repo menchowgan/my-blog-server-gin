@@ -29,6 +29,8 @@ func Group(r *gin.Engine, groupMap GroupStruct) {
 					post(routerGroup, route.Url, route.Handler)
 				case http.MethodPut:
 					put(routerGroup, route.Url, route.Handler)
+				case http.MethodDelete:
+					delete(routerGroup, route.Url, route.Handler)
 				}
 			}
 		}
@@ -53,6 +55,14 @@ func post(rg *gin.RouterGroup, url string, callback Handler) {
 
 func put(rg *gin.RouterGroup, url string, callback Handler) {
 	rg.PUT(url, func(c *gin.Context) {
+		if err := callback(c); err != nil {
+			errhandler.Handle(err, c)
+		}
+	})
+}
+
+func delete(rg *gin.RouterGroup, url string, callback Handler) {
+	rg.DELETE(url, func(c *gin.Context) {
 		if err := callback(c); err != nil {
 			errhandler.Handle(err, c)
 		}

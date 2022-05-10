@@ -37,7 +37,10 @@ func GerUserSimpleInfo(c *gin.Context) error {
 	id := c.Param("id")
 	fmt.Println(id)
 
-	user := user.GerUserInfo(id)
+	user, err := user.GerUserInfo(id)
+	if err != nil {
+		return err
+	}
 
 	c.JSON(http.StatusOK, gin.H{
 		"code": http.StatusOK,
@@ -51,7 +54,10 @@ func GerUserBriefInfo(c *gin.Context) error {
 	id := c.Param("id")
 	fmt.Println(id)
 
-	user := user.SearchUserBrief(id)
+	user, err := user.SearchUserBrief(id)
+	if err != nil {
+		return err
+	}
 
 	c.JSON(http.StatusOK, gin.H{
 		"code": http.StatusOK,

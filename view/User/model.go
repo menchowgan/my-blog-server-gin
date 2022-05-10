@@ -2,6 +2,7 @@ package user
 
 import (
 	Article "gmc-blog-server/view/Article"
+	photos "gmc-blog-server/view/Photos"
 
 	"gorm.io/gorm"
 )
@@ -31,11 +32,11 @@ type UserEnrollModel struct {
 }
 
 type PsersonSimpleIinfo struct {
-	ID       uint   `json:"id"`
-	Nickname string `json:"nickname"`
-	Fans     int16  `json:"fans"`
-	Avatar   string `json:"avatar"`
-	Photos   string `json:"photos"`
+	ID       uint               `json:"id"`
+	Nickname string             `json:"nickname"`
+	Fans     int16              `json:"fans"`
+	Avatar   string             `json:"avatar"`
+	Photos   []photos.PhotoInfo `json:"photos"`
 }
 
 type PsersonBrief struct {
