@@ -58,9 +58,17 @@ func main() {
 			},
 			"/photo": {
 				{
-					Url:     "/avatar/upload",
+					Url:     "/avatar/upload/:userid",
 					Method:  http.MethodPost,
 					Handler: photos.AvatarUpload,
+				}, {
+					Url:     "/user/photos/upload/:userid", //将用户的图片列表组成字符串存到用户响应表里
+					Method:  http.MethodPost,
+					Handler: photos.UserPhotosUpload,
+				}, {
+					Url:     "/user/photos/delete",
+					Method:  http.MethodDelete,
+					Handler: photos.UserPhotosDelete,
 				},
 			},
 		},
