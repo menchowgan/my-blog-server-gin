@@ -2,6 +2,7 @@ package photos
 
 import (
 	"encoding/json"
+	fileapi "gmc-blog-server/api/File"
 	"gmc-blog-server/config"
 	photos "gmc-blog-server/view/Photos"
 	"io/ioutil"
@@ -9,7 +10,6 @@ import (
 	"mime/multipart"
 	"net/http"
 	"os"
-	"path/filepath"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -87,6 +87,7 @@ func UserPhotosUpload(c *gin.Context) error {
 
 func PhotoUpload(c *gin.Context) error {
 	file, err := c.FormFile("file")
+	log.Println("photo file: ", file.Filename)
 	if err == nil {
 		filename, err := photoUpload(c, file)
 		if err == nil && filename != "" {
@@ -108,24 +109,7 @@ func PhotoUpload(c *gin.Context) error {
 }
 
 func photoUpload(c *gin.Context, file *multipart.FileHeader) (string, error) {
-	userid := c.Param("userid")
-	folderName := userid
-	folderPath := filepath.Join(config.PHOTO_PATH, folderName)
-	if _, err := os.Stat(folderPath); os.IsNotExist(err) {
-		os.Mkdir(folderPath, 0777)
-		os.Chmod(folderPath, 0777)
-	}
-	log.Println(file.Filename)
-	dst := folderPath + "/" + file.Filename
-
-	log.Printf("file path: %s\n", folderPath)
-	log.Printf("file name : %s", file.Filename)
-
-	err := c.SaveUploadedFile(file, dst)
-	if err == nil && file.Filename != "" {
-		return file.Filename, err
-	}
-	return "", err
+	return fileapi.FileUpload(c, file, config.PHOTO_PATH)
 }
 
 func deletePicture(uri string) error {

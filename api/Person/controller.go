@@ -28,6 +28,8 @@ func PersonInfoPost(c *gin.Context) error {
 			"code":    0,
 			"data":    person,
 		})
+
+		return nil
 	}
 
 	return err

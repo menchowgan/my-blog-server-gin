@@ -5,7 +5,9 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 
+	music "gmc-blog-server/api/Music"
 	person "gmc-blog-server/api/Person"
 	photos "gmc-blog-server/api/Photos"
 	db "gmc-blog-server/db"
@@ -43,22 +45,22 @@ func main() {
 		Group: router.GroupMap{
 			"/user": {
 				{
-					Url:     "/person-info-post",
+					Url:     "/person-info-post", // 注册用户信息
 					Method:  http.MethodPost,
 					Handler: person.PersonInfoPost,
 				}, {
-					Url:     "/get-user-simple-info/:id",
+					Url:     "/get-user-simple-info/:id", // 首页获取用户简单信息
 					Method:  http.MethodGet,
 					Handler: person.GerUserSimpleInfo,
 				}, {
-					Url:     "/search-user-brief/:id",
+					Url:     "/search-user-brief/:id", // 详情页查询用户详细信息
 					Method:  http.MethodGet,
 					Handler: person.GerUserBriefInfo,
 				},
 			},
 			"/photo": {
 				{
-					Url:     "/avatar/upload/:userid",
+					Url:     "/avatar/upload/:userid", // 用户头像上传
 					Method:  http.MethodPost,
 					Handler: photos.AvatarUpload,
 				}, {
@@ -66,9 +68,26 @@ func main() {
 					Method:  http.MethodPost,
 					Handler: photos.UserPhotosUpload,
 				}, {
-					Url:     "/user/photos/delete",
+					Url:     "/user/photos/delete", //先对数据库进行更新再删除文件
 					Method:  http.MethodDelete,
 					Handler: photos.UserPhotosDelete,
+				},
+			},
+			"/music": {
+				{
+					Url:     "/upload/:userid", //用户收藏音乐上传
+					Method:  http.MethodPost,
+					Handler: music.MusicUpload,
+				},
+				{
+					Url:     "/cover/upload/:userid", // 用户上传音乐的封面
+					Method:  http.MethodPost,
+					Handler: photos.AvatarUpload,
+				},
+				{
+					Url:     "/user/upload", // 用户收藏歌曲完整信息上传
+					Method:  http.MethodPost,
+					Handler: music.UserMusicUpload,
 				},
 			},
 		},
@@ -90,34 +109,49 @@ func initTables() {
 	dw := db.DB.GetDbW()
 	dr := db.DB.GetDbR()
 
-	var err error
-	has := dr.Migrator().HasTable(&model.User{})
+	dr.Transaction(func(tx *gorm.DB) error {
+		var err error
+		has := dr.Migrator().HasTable(&model.User{})
 
-	if !has {
-		err = dw.AutoMigrate(&model.User{})
-	}
+		if !has {
+			err = dw.AutoMigrate(&model.User{})
+		}
 
-	if err != nil {
-		panic(err)
-	}
+		if err != nil {
+			return err
+		}
 
-	has = dr.Migrator().HasTable(&model.Articles{})
+		has = dr.Migrator().HasTable(&model.Articles{})
 
-	if !has {
-		err = dw.AutoMigrate(&model.Articles{})
-	}
+		if !has {
+			err = dw.AutoMigrate(&model.Articles{})
+		}
 
-	if err != nil {
-		panic(err)
-	}
+		if err != nil {
+			return err
+		}
 
-	has = dr.Migrator().HasTable(&model.Photos{})
+		has = dr.Migrator().HasTable(&model.Photos{})
 
-	if !has {
-		err = dw.AutoMigrate(&model.Photos{})
-	}
+		if !has {
+			err = dw.AutoMigrate(&model.Photos{})
+		}
 
-	if err != nil {
-		panic(err)
-	}
+		if err != nil {
+			return err
+		}
+
+		has = dr.Migrator().HasTable(&model.Music{})
+
+		if !has {
+			err = dw.AutoMigrate(&model.Music{})
+		}
+
+		if err != nil {
+			return err
+		}
+
+		return nil
+	})
+
 }

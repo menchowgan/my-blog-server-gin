@@ -1,7 +1,8 @@
 package user
 
 import (
-	Article "gmc-blog-server/view/Article"
+	article "gmc-blog-server/view/Article"
+	music "gmc-blog-server/view/Music"
 	photos "gmc-blog-server/view/Photos"
 
 	"gorm.io/gorm"
@@ -17,7 +18,8 @@ type PersonInfoModel struct {
 	Brief               string                           `json:"brief"`
 	Avatar              string                           `json:"avatar"`
 	Photos              string                           `json:"photos"`
-	ArticleSimplaeInfos []Article.ArticleSimpleInfoModel `json:"articleSimplaeInfos"`
+	Audios              []music.MusicInfo                `json:"audios"`
+	ArticleSimplaeInfos []article.ArticleSimpleInfoModel `json:"articleSimplaeInfos"`
 }
 
 type UserEnrollModel struct {

@@ -4,6 +4,7 @@ import (
 	"gmc-blog-server/config"
 	"gmc-blog-server/db"
 	"gmc-blog-server/model"
+	music "gmc-blog-server/view/Music"
 	photos "gmc-blog-server/view/Photos"
 	"log"
 	"strconv"
@@ -43,9 +44,9 @@ func GerUserInfo(id string) (PsersonSimpleIinfo, error) {
 
 	if photo.ImgUrls != "" && len(photo.ImgUrls) > 0 {
 		urls := strings.Split(photo.ImgUrls, ";")
-		for _, url := range urls {
+		for idx, url := range urls {
 			model := photos.PhotoInfo{
-				ID:  photo.ID,
+				ID:  uint(idx + 1),
 				Url: config.PHOTO_QUERY_PATH + id + "/" + url,
 			}
 			imgUrls = append(imgUrls, model)
@@ -72,6 +73,25 @@ func SearchUserBrief(id string) (PersonInfoModel, error) {
 		return PersonInfoModel{}, err
 	}
 
+	var audios []model.Music
+	err = dr.Where("userId = ?", id).Find(&audios).Error
+	if err != nil {
+		return PersonInfoModel{}, err
+	}
+
+	audioArray := []music.MusicInfo{}
+	for _, audio := range audios {
+		audioArray = append(audioArray, music.MusicInfo{
+			ID:        audio.ID,
+			UserId:    int(audio.UserId),
+			Title:     audio.Title,
+			Artist:    audio.Artist,
+			Evalution: audio.Evalution,
+			Avatar:    config.PHOTO_QUERY_PATH + id + "/" + audio.Avatar,
+			AudioUrl:  config.MUSCI_QUERY_PATH + id + "/" + audio.AudioUrl,
+		})
+	}
+
 	u := PersonInfoModel{
 		ID:       user.ID,
 		Nickname: user.Nickname,
@@ -79,7 +99,8 @@ func SearchUserBrief(id string) (PersonInfoModel, error) {
 		Fans:     user.Fans,
 		Brief:    user.Brief,
 		Hobbies:  user.Hobbies,
-		Avatar:   config.PHOTO_QUERY_PATH + strconv.Itoa(int(user.ID)) + "/" + user.Avatar,
+		Audios:   audioArray,
+		Avatar:   config.PHOTO_QUERY_PATH + id + "/" + user.Avatar,
 	}
 
 	return u, nil
