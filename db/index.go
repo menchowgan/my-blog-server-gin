@@ -3,6 +3,7 @@ package db
 import (
 	"fmt"
 	"gmc-blog-server/config"
+	"gmc-blog-server/model"
 	"time"
 
 	"gorm.io/driver/mysql"
@@ -120,4 +121,51 @@ func dbConnect(user, pass, addr, dbName string) (*gorm.DB, error) {
 	sqlDB.SetConnMaxLifetime(time.Minute * time.Duration(10))
 
 	return db, nil
+}
+
+func InitTables() {
+	dw := DB.GetDbW()
+	dr := DB.GetDbR()
+
+	dw.Transaction(func(tx *gorm.DB) error {
+		var err error
+		has := dr.Migrator().HasTable(&model.User{})
+
+		if !has {
+			err = dw.AutoMigrate(&model.User{})
+			if err != nil {
+				return err
+			}
+		}
+
+		has = dr.Migrator().HasTable(&model.Articles{})
+
+		if !has {
+			err = dw.AutoMigrate(&model.Articles{})
+			if err != nil {
+				return err
+			}
+		}
+
+		has = dr.Migrator().HasTable(&model.Photos{})
+
+		if !has {
+			err = dw.AutoMigrate(&model.Photos{})
+			if err != nil {
+				return err
+			}
+		}
+
+		has = dr.Migrator().HasTable(&model.Music{})
+
+		if !has {
+			err = dw.AutoMigrate(&model.Music{})
+			if err != nil {
+				return err
+			}
+		}
+
+		return nil
+	})
+
 }

@@ -5,12 +5,38 @@ import (
 	"gmc-blog-server/config"
 	"gmc-blog-server/model"
 	music "gmc-blog-server/view/Music"
+	photos "gmc-blog-server/view/Photos"
 	"log"
 	"mime/multipart"
 	"net/http"
+	"os"
+	"path/filepath"
 
 	"github.com/gin-gonic/gin"
 )
+
+func MusicCoverUpload(c *gin.Context) error {
+	file, err := c.FormFile("file")
+	log.Println("photo file: ", file.Filename)
+	if err == nil {
+		filename, err := coverUpload(c, file)
+		if err == nil && filename != "" {
+			c.JSON(http.StatusOK, gin.H{
+				"code":    http.StatusOK,
+				"success": true,
+				"data":    "cover/" + file.Filename,
+			})
+			return nil
+		}
+		c.JSON(photos.AvatarUploadFailed, gin.H{
+			"code":    photos.AvatarUploadFailed,
+			"data":    nil,
+			"message": photos.StatusText(photos.AvatarUploadFailed),
+		})
+		return nil
+	}
+	return err
+}
 
 func UserMusicUpload(c *gin.Context) error {
 	var audio model.Music
@@ -67,4 +93,26 @@ func MusicUpload(c *gin.Context) error {
 
 func musicUpload(c *gin.Context, file *multipart.FileHeader) (string, error) {
 	return fileapi.FileUpload(c, file, config.MUSCI_PATH)
+}
+
+func coverUpload(c *gin.Context, file *multipart.FileHeader) (string, error) {
+	userid := c.Param("userid")
+	log.Println("photo upload user id: ", userid)
+	folderName := "cover"
+	folderPath := filepath.Join(config.PHOTO_PATH, userid, folderName)
+	if _, err := os.Stat(folderPath); os.IsNotExist(err) {
+		os.Mkdir(folderPath, 0777)
+		os.Chmod(folderPath, 0777)
+	}
+	log.Println(file.Filename)
+	dst := filepath.Join(folderPath, file.Filename)
+
+	log.Printf("file path: %s\n", folderPath)
+	log.Printf("file name : %s", file.Filename)
+
+	err := c.SaveUploadedFile(file, dst)
+	if err == nil && file.Filename != "" {
+		return file.Filename, err
+	}
+	return "", err
 }

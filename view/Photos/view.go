@@ -12,13 +12,13 @@ import (
 )
 
 func PhotoUpdate(fileName string, userId string) error {
-	photosString, err := PhotosQueryByUserId(userId)
+	photosStringModel, err := PhotosQueryByUserId(userId)
 	if err != nil {
 		return err
 	}
-	log.Println(photosString.UserId, photosString.ID, photosString.ImgUrls)
+	log.Println(photosStringModel.UserId, photosStringModel.ID, photosStringModel.ImgUrls)
 
-	if photosString.ID == 0 {
+	if photosStringModel.ID == 0 {
 		i, _ := strconv.Atoi(userId)
 
 		photoInfo := model.Photos{
@@ -33,9 +33,9 @@ func PhotoUpdate(fileName string, userId string) error {
 		}
 	} else {
 		log.Println("new file image: ", fileName)
-		photosString.ImgUrls = photosString.ImgUrls + ";" + fileName
+		photosStringModel.ImgUrls = photosStringModel.ImgUrls + ";" + fileName
 		dw := db.DB.GetDbW()
-		err = dw.Save(&photosString).Error
+		err = dw.Save(&photosStringModel).Error
 		if err != nil {
 			return err
 		}

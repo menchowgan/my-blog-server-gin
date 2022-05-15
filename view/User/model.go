@@ -34,11 +34,12 @@ type UserEnrollModel struct {
 }
 
 type PsersonSimpleIinfo struct {
-	ID       uint               `json:"id"`
-	Nickname string             `json:"nickname"`
-	Fans     int16              `json:"fans"`
-	Avatar   string             `json:"avatar"`
-	Photos   []photos.PhotoInfo `json:"photos"`
+	ID                 uint                             `json:"id"`
+	Nickname           string                           `json:"nickname"`
+	Fans               int16                            `json:"fans"`
+	Avatar             string                           `json:"avatar"`
+	Photos             []photos.PhotoInfo               `json:"photos"`
+	ArticleSimpleInfos []article.ArticleSimpleInfoModel `json:"articleSimpleInfos"`
 }
 
 type PsersonBrief struct {

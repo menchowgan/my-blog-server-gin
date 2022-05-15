@@ -4,6 +4,7 @@ import (
 	"gmc-blog-server/config"
 	"gmc-blog-server/db"
 	"gmc-blog-server/model"
+	article "gmc-blog-server/view/Article"
 	music "gmc-blog-server/view/Music"
 	photos "gmc-blog-server/view/Photos"
 	"log"
@@ -11,7 +12,7 @@ import (
 	"strings"
 )
 
-func InsertUser(user model.User) (uint, error) {
+func InsertUser(user *model.User) error {
 	dw := db.DB.GetDbW()
 
 	log.Printf("nickname: %s, gender: %s, avatar: %s", user.Nickname, user.Gender, user.Avatar)
@@ -19,9 +20,18 @@ func InsertUser(user model.User) (uint, error) {
 
 	err := dw.Create(&user).Error
 	if err == nil {
-		return user.ID, nil
+		return nil
 	}
-	return 0, err
+	return err
+}
+
+func Save(user *model.User) (*model.User, error) {
+	dw := db.DB.GetDbW()
+	err := dw.Save(user).Error
+	if err != nil {
+		return nil, err
+	}
+	return user, nil
 }
 
 func GerUserInfo(id string) (PsersonSimpleIinfo, error) {
@@ -53,12 +63,20 @@ func GerUserInfo(id string) (PsersonSimpleIinfo, error) {
 		}
 	}
 
+	articles, err := article.ArticleSimplaeInfosQueryByUserId(id)
+	if err != nil {
+		return PsersonSimpleIinfo{}, err
+	}
+
+	articleSIs := getArticleSimpleInfo(id, articles)
+
 	u := PsersonSimpleIinfo{
-		ID:       user.ID,
-		Nickname: user.Nickname,
-		Fans:     user.Fans,
-		Photos:   imgUrls,
-		Avatar:   config.PHOTO_QUERY_PATH + strconv.Itoa(int(user.ID)) + "/" + user.Avatar,
+		ID:                 user.ID,
+		Nickname:           user.Nickname,
+		Fans:               user.Fans,
+		Photos:             imgUrls,
+		ArticleSimpleInfos: articleSIs,
+		Avatar:             config.PHOTO_QUERY_PATH + strconv.Itoa(int(user.ID)) + "/" + user.Avatar,
 	}
 
 	return u, nil
@@ -105,4 +123,22 @@ func SearchUserBrief(id string) (PersonInfoModel, error) {
 
 	return u, nil
 
+}
+
+func getArticleSimpleInfo(id string, articles []model.Articles) []article.ArticleSimpleInfoModel {
+	var articleSIs []article.ArticleSimpleInfoModel //id, userId, imgUrl, title, content, created_at
+	if len(articles) > 0 {
+		for _, a := range articles {
+			articleSIs = append(articleSIs, article.ArticleSimpleInfoModel{
+				ID:     int64(a.ID),
+				Title:  a.Title,
+				UserId: a.UserId,
+				ImgUrl: config.PHOTO_QUERY_PATH + id + "/article/" + a.ImgUrl,
+				Brief:  a.Brief,
+				Date:   a.CreatedAt,
+			})
+		}
+	}
+
+	return articleSIs
 }
