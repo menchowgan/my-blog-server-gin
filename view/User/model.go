@@ -4,6 +4,7 @@ import (
 	article "gmc-blog-server/view/Article"
 	music "gmc-blog-server/view/Music"
 	photos "gmc-blog-server/view/Photos"
+	video "gmc-blog-server/view/Video"
 
 	"gorm.io/gorm"
 )
@@ -19,6 +20,7 @@ type PersonInfoModel struct {
 	Avatar              string                           `json:"avatar"`
 	Photos              string                           `json:"photos"`
 	Audios              []music.MusicInfo                `json:"audios"`
+	Videos              []video.VideoInfo                `json:"videos"`
 	ArticleSimplaeInfos []article.ArticleSimpleInfoModel `json:"articleSimplaeInfos"`
 }
 

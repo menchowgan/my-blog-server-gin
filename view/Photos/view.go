@@ -28,7 +28,7 @@ func PhotoUpdate(fileName string, userId string) error {
 		log.Printf("photo info is: %s\\ %v", photoInfo.ImgUrls, photoInfo.UserId)
 		dw := db.DB.GetDbW()
 		err := dw.Create(&photoInfo).Error
-		if err == nil {
+		if err != nil {
 			return err
 		}
 	} else {

@@ -165,6 +165,15 @@ func InitTables() {
 			}
 		}
 
+		has = dr.Migrator().HasTable(&model.Video{})
+
+		if !has {
+			err = dw.AutoMigrate(&model.Video{})
+			if err != nil {
+				return err
+			}
+		}
+
 		return nil
 	})
 

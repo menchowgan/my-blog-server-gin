@@ -7,6 +7,7 @@ import (
 	article "gmc-blog-server/view/Article"
 	music "gmc-blog-server/view/Music"
 	photos "gmc-blog-server/view/Photos"
+	video "gmc-blog-server/view/Video"
 	"log"
 	"strconv"
 	"strings"
@@ -92,7 +93,7 @@ func SearchUserBrief(id string) (PersonInfoModel, error) {
 	}
 
 	var audios []model.Music
-	err = dr.Where("userId = ?", id).Find(&audios).Error
+	err = dr.Where("userId = ?", id).Order("created_at desc").Find(&audios).Error
 	if err != nil {
 		return PersonInfoModel{}, err
 	}
@@ -110,6 +111,24 @@ func SearchUserBrief(id string) (PersonInfoModel, error) {
 		})
 	}
 
+	var videos []model.Video
+	err = dr.Where("userId = ?", id).Order("created_at desc").Find(&videos).Error
+	if err != nil {
+		return PersonInfoModel{}, err
+	}
+	videosArray := []video.VideoInfo{}
+	for _, v := range videos {
+		videosArray = append(videosArray, video.VideoInfo{
+			ID:        v.ID,
+			UserId:    int(v.UserId),
+			Title:     v.Title,
+			Artist:    v.Artist,
+			Evalution: v.Evalution,
+			VideoUrl:  config.VIDEO_QUERY_PATH + id + "/" + v.VideoUrl,
+			Avatar:    config.PHOTO_QUERY_PATH + id + "/" + v.Avatar,
+		})
+	}
+
 	u := PersonInfoModel{
 		ID:       user.ID,
 		Nickname: user.Nickname,
@@ -118,6 +137,7 @@ func SearchUserBrief(id string) (PersonInfoModel, error) {
 		Brief:    user.Brief,
 		Hobbies:  user.Hobbies,
 		Audios:   audioArray,
+		Videos:   videosArray,
 		Avatar:   config.PHOTO_QUERY_PATH + id + "/" + user.Avatar,
 	}
 

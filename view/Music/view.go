@@ -6,10 +6,6 @@ import (
 	"log"
 )
 
-func MusicUpdate(fileName string, userId string) error {
-	return nil
-}
-
 func InsertMusicInfo(audio model.Music) (uint, error) {
 	dw := db.DB.GetDbW()
 

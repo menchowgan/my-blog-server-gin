@@ -1,11 +1,11 @@
-package music
+package video
 
 import (
 	fileapi "gmc-blog-server/api/File"
 	"gmc-blog-server/config"
 	"gmc-blog-server/model"
-	music "gmc-blog-server/view/Music"
 	photos "gmc-blog-server/view/Photos"
+	video "gmc-blog-server/view/Video"
 	"log"
 	"mime/multipart"
 	"net/http"
@@ -15,7 +15,28 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func MusicCoverUpload(c *gin.Context) error {
+func VideoUpload(c *gin.Context) error {
+	file, err := c.FormFile("file")
+	if err != nil {
+		return err
+	}
+	filename, err := videoUpload(c, file)
+	if err != nil {
+		return err
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"code":    http.StatusOK,
+		"data":    filename,
+		"message": "音频上传成功：" + filename,
+	})
+	return nil
+}
+
+func videoUpload(c *gin.Context, file *multipart.FileHeader) (string, error) {
+	return fileapi.FileUpload(c, file, config.VIDEO_PATH)
+}
+
+func VideoCoverUpload(c *gin.Context) error {
 	file, err := c.FormFile("file")
 	log.Println("photo file: ", file.Filename)
 	if err == nil {
@@ -24,7 +45,7 @@ func MusicCoverUpload(c *gin.Context) error {
 			c.JSON(http.StatusOK, gin.H{
 				"code":    http.StatusOK,
 				"success": true,
-				"data":    "cover/" + file.Filename,
+				"data":    "coverVideo/" + file.Filename,
 			})
 			return nil
 		}
@@ -38,30 +59,29 @@ func MusicCoverUpload(c *gin.Context) error {
 	return err
 }
 
-func UserMusicUpload(c *gin.Context) error {
-	var audio model.Music
+func UserVideoUpload(c *gin.Context) error {
+	var videoModel model.Video
 
-	if err := c.ShouldBind(&audio); err != nil {
+	if err := c.ShouldBind(&videoModel); err != nil {
 		return err
 	}
-	log.Println("audio post: ", audio.AudioUrl)
-	log.Println("audio post: ", audio.UserId)
-	log.Println("audio post: ", audio.Avatar)
-	log.Println("audio post: ", audio.Title)
-	log.Println("audio post: ", audio.Artist)
-	log.Println("audio post: ", audio.Evalution)
+	log.Println("video post: ", videoModel.VideoUrl)
+	log.Println("video post: ", videoModel.UserId)
+	log.Println("video post: ", videoModel.Avatar)
+	log.Println("video post: ", videoModel.Title)
+	log.Println("video post: ", videoModel.Artist)
+	log.Println("video post: ", videoModel.Evalution)
 
-	audioId, err := music.InsertMusicInfo(audio)
+	err := video.InsertVideoInfo(&videoModel)
 
 	if err == nil {
 		log.Println("insert successful")
-		log.Println(audioId)
-		audio.ID = audioId
+		log.Println(videoModel)
 
 		c.JSON(http.StatusOK, gin.H{
 			"message": "接受成功",
 			"code":    0,
-			"data":    audio,
+			"data":    videoModel,
 		})
 		return nil
 	}
@@ -69,31 +89,10 @@ func UserMusicUpload(c *gin.Context) error {
 	return err
 }
 
-func MusicUpload(c *gin.Context) error {
-	file, err := c.FormFile("file")
-	if err != nil {
-		return err
-	}
-	filename, err := musicUpload(c, file)
-	if err != nil {
-		return err
-	}
-	c.JSON(http.StatusOK, gin.H{
-		"code":    http.StatusOK,
-		"data":    filename,
-		"message": "音频上传成功：" + filename,
-	})
-	return nil
-}
-
-func musicUpload(c *gin.Context, file *multipart.FileHeader) (string, error) {
-	return fileapi.FileUpload(c, file, config.MUSCI_PATH)
-}
-
 func coverUpload(c *gin.Context, file *multipart.FileHeader) (string, error) {
 	userid := c.Param("userid")
 	log.Println("photo upload user id: ", userid)
-	folderName := "cover"
+	folderName := "coverVideo"
 	folderPath := filepath.Join(config.PHOTO_PATH, userid, folderName)
 	if _, err := os.Stat(folderPath); os.IsNotExist(err) {
 		os.Mkdir(folderPath, 0777)

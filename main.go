@@ -10,6 +10,7 @@ import (
 	music "gmc-blog-server/api/Music"
 	person "gmc-blog-server/api/Person"
 	photos "gmc-blog-server/api/Photos"
+	video "gmc-blog-server/api/Video"
 	db "gmc-blog-server/db"
 	router "gmc-blog-server/router"
 )
@@ -77,13 +78,11 @@ func main() {
 					Url:     "/upload/:userid", //用户收藏音乐上传
 					Method:  http.MethodPost,
 					Handler: music.MusicUpload,
-				},
-				{
+				}, {
 					Url:     "/cover/upload/:userid", // 用户上传音乐的封面
 					Method:  http.MethodPost,
 					Handler: music.MusicCoverUpload,
-				},
-				{
+				}, {
 					Url:     "/user/upload", // 用户收藏歌曲完整信息上传
 					Method:  http.MethodPost,
 					Handler: music.UserMusicUpload,
@@ -91,29 +90,40 @@ func main() {
 			},
 			"/article": {
 				{
-					Url:     "/avatar/upload/:userid",
+					Url:     "/avatar/upload/:userid", // 文章封面图片上传
 					Method:  http.MethodPost,
 					Handler: article.ArticleAvatarUpload,
-				},
-				{
-					Url:     "/photo/upload/:userid",
+				}, {
+					Url:     "/photo/upload/:userid", // 文章内图片上传
 					Method:  http.MethodPost,
 					Handler: article.ArticlePhotosUPload,
-				},
-				{
-					Url:     "/upload",
+				}, {
+					Url:     "/upload", // 文章整体完整信息上传
 					Method:  http.MethodPost,
 					Handler: article.ArticlePost,
-				},
-				{
-					Url:     "/query/:articleId",
+				}, {
+					Url:     "/query/:articleId", // 文章查询 使用id
 					Method:  http.MethodGet,
 					Handler: article.ArticleQuery,
-				},
-				{
-					Url:     "/query-by-type/:userid/:type",
+				}, {
+					Url:     "/query-by-type/:userid/:type", // 文章查询 使用类型名进行模糊查询
 					Method:  http.MethodGet,
 					Handler: article.ArticleQueryByType,
+				},
+			},
+			"/video": {
+				{
+					Url:     "/upload/:userid",
+					Method:  http.MethodPost,
+					Handler: video.VideoUpload,
+				}, {
+					Url:     "/cover/upload/:userid", // 用户上传视频的封面
+					Method:  http.MethodPost,
+					Handler: video.VideoCoverUpload,
+				}, {
+					Url:     "/user/upload",
+					Method:  http.MethodPost,
+					Handler: video.UserVideoUpload,
 				},
 			},
 		},
