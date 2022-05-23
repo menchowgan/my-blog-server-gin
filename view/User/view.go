@@ -28,7 +28,7 @@ func InsertUser(user *model.User) error {
 
 func Save(user *model.User) (*model.User, error) {
 	dw := db.DB.GetDbW()
-	err := dw.Save(user).Error
+	err := dw.Model(&model.User{}).Where("id = ?", user.ID).Updates(map[string]interface{}{"nickname": user.Nickname, "hobbies": user.Hobbies, "gender": user.Gender, "brief": user.Brief, "avatar": user.Avatar}).Error
 	if err != nil {
 		return nil, err
 	}
@@ -92,41 +92,14 @@ func SearchUserBrief(id string) (PersonInfoModel, error) {
 		return PersonInfoModel{}, err
 	}
 
-	var audios []model.Music
-	err = dr.Where("userId = ?", id).Order("created_at desc").Find(&audios).Error
+	audioArray, err := music.SearchByUserId(id)
 	if err != nil {
 		return PersonInfoModel{}, err
 	}
 
-	audioArray := []music.MusicInfo{}
-	for _, audio := range audios {
-		audioArray = append(audioArray, music.MusicInfo{
-			ID:        audio.ID,
-			UserId:    int(audio.UserId),
-			Title:     audio.Title,
-			Artist:    audio.Artist,
-			Evalution: audio.Evalution,
-			Avatar:    config.PHOTO_QUERY_PATH + id + "/" + audio.Avatar,
-			AudioUrl:  config.MUSCI_QUERY_PATH + id + "/" + audio.AudioUrl,
-		})
-	}
-
-	var videos []model.Video
-	err = dr.Where("userId = ?", id).Order("created_at desc").Find(&videos).Error
+	videosArray, err := video.SearchByUserId(id)
 	if err != nil {
 		return PersonInfoModel{}, err
-	}
-	videosArray := []video.VideoInfo{}
-	for _, v := range videos {
-		videosArray = append(videosArray, video.VideoInfo{
-			ID:        v.ID,
-			UserId:    int(v.UserId),
-			Title:     v.Title,
-			Artist:    v.Artist,
-			Evalution: v.Evalution,
-			VideoUrl:  config.VIDEO_QUERY_PATH + id + "/" + v.VideoUrl,
-			Avatar:    config.PHOTO_QUERY_PATH + id + "/" + v.Avatar,
-		})
 	}
 
 	u := PersonInfoModel{
@@ -142,7 +115,6 @@ func SearchUserBrief(id string) (PersonInfoModel, error) {
 	}
 
 	return u, nil
-
 }
 
 func getArticleSimpleInfo(id string, articles []model.Articles) []article.ArticleSimpleInfoModel {
@@ -161,4 +133,24 @@ func getArticleSimpleInfo(id string, articles []model.Articles) []article.Articl
 	}
 
 	return articleSIs
+}
+
+func GetUserAllInfo(id string) (UserEnrollModel, error) {
+	var user model.User
+	dr := db.DB.GetDbR()
+
+	err := dr.Where("id = ?", id).First(&user).Error
+	if err != nil {
+		return UserEnrollModel{}, err
+	}
+	return UserEnrollModel{
+		ID:        user.ID,
+		CreatedAt: user.CreatedAt,
+		Nickname:  user.Nickname,
+		Gender:    user.Gender,
+		Hobbies:   user.Hobbies,
+		Evaluate:  int(user.Evaluate),
+		Brief:     user.Brief,
+		Avatar:    config.PHOTO_QUERY_PATH + id + "/" + user.Avatar,
+	}, nil
 }

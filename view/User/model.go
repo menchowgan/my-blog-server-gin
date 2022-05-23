@@ -5,8 +5,7 @@ import (
 	music "gmc-blog-server/view/Music"
 	photos "gmc-blog-server/view/Photos"
 	video "gmc-blog-server/view/Video"
-
-	"gorm.io/gorm"
+	"time"
 )
 
 type PersonInfoModel struct {
@@ -25,14 +24,15 @@ type PersonInfoModel struct {
 }
 
 type UserEnrollModel struct {
-	gorm.Model
-	Nickname string `json:"nickname"`
-	Gender   string `json:"gender"`
-	Hobbies  string `json:"hobbies"`
-	Fans     int    `json:"fans"`
-	Evaluate int    `json:"evaluate"`
-	Brief    string `json:"brief"`
-	Avatar   string `json:"avatar"`
+	ID        uint      `json:"id"`
+	CreatedAt time.Time `json:"createdAt"`
+	Nickname  string    `json:"nickname"`
+	Gender    string    `json:"gender"`
+	Hobbies   string    `json:"hobbies"`
+	Fans      int       `json:"fans"`
+	Evaluate  int       `json:"evaluate"`
+	Brief     string    `json:"brief"`
+	Avatar    string    `json:"avatar"`
 }
 
 type PsersonSimpleIinfo struct {

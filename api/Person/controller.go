@@ -86,3 +86,16 @@ func GerUserBriefInfo(c *gin.Context) error {
 
 	return nil
 }
+
+func GetInfo(c *gin.Context) error {
+	id := c.Param("userid")
+	u, err := user.GetUserAllInfo(id)
+	if err == nil {
+		c.JSON(http.StatusOK, gin.H{
+			"code":    http.StatusOK,
+			"message": "查询用户信息成功",
+			"data":    u,
+		})
+	}
+	return err
+}

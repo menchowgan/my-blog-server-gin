@@ -24,8 +24,6 @@ func main() {
 		panic(err)
 	}
 
-	db.InitTables()
-
 	defer func() {
 		db.DB.DbRClose()
 		db.DB.DbWClose()
@@ -33,6 +31,8 @@ func main() {
 			panic(err)
 		}
 	}()
+
+	db.InitTables()
 
 	router.Get(r, "/hello", func(ctx *gin.Context) error {
 		ctx.JSON(http.StatusOK, gin.H{
@@ -56,6 +56,10 @@ func main() {
 					Url:     "/search-user-brief/:id", // 详情页查询用户详细信息
 					Method:  http.MethodGet,
 					Handler: person.GerUserBriefInfo,
+				}, {
+					Url:     "/get/:userid",
+					Method:  http.MethodGet,
+					Handler: person.GetInfo,
 				},
 			},
 			"/photo": {
@@ -64,18 +68,18 @@ func main() {
 					Method:  http.MethodPost,
 					Handler: photos.AvatarUpload,
 				}, {
-					Url:     "/user/photos/upload/:userid", //将用户的图片列表组成字符串存到用户响应表里
+					Url:     "/user/photos/upload/:userid", // 将用户的图片列表组成字符串存到用户响应表里
 					Method:  http.MethodPost,
 					Handler: photos.UserPhotosUpload,
 				}, {
-					Url:     "/user/photos/delete", //先对数据库进行更新再删除文件
+					Url:     "/user/photos/delete", // 先对数据库进行更新再删除文件
 					Method:  http.MethodDelete,
 					Handler: photos.UserPhotosDelete,
 				},
 			},
 			"/music": {
 				{
-					Url:     "/upload/:userid", //用户收藏音乐上传
+					Url:     "/upload/:userid", // 用户收藏音乐上传
 					Method:  http.MethodPost,
 					Handler: music.MusicUpload,
 				}, {
