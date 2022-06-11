@@ -112,6 +112,15 @@ func ArticleAvatarUpload(c *gin.Context) error {
 	return err
 }
 
+func ArticleVideoUpload(c *gin.Context) error {
+	file, err := c.FormFile("wangeditor-uploaded-video")
+	if err != nil {
+		return err
+	}
+	saveVideo(c, file)
+	return nil
+}
+
 func savePhotoFile(c *gin.Context, file *multipart.FileHeader) error {
 	log.Println("photo file: ", file.Filename)
 	userid := c.Param("userid")
@@ -136,11 +145,54 @@ func savePhotoFile(c *gin.Context, file *multipart.FileHeader) error {
 	return nil
 }
 
+func saveVideo(c *gin.Context, file *multipart.FileHeader) error {
+	log.Println("video name: ", file.Filename)
+	userid := c.Param("userid")
+	filename, err := articleVideoUpload(c, file)
+	if err != nil || filename == "" {
+		c.JSON(photos.AvatarUploadFailed, gin.H{
+			"code":    photos.AvatarUploadFailed,
+			"errno":   1, // 只要不等于 0 就行
+			"message": "失败信息",
+		})
+		return nil
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"errno":   0,
+		"success": true,
+		"data": articleUploadResponse{
+			Url: config.VIDEO_QUERY_PATH + userid + "/article/" + file.Filename,
+		},
+	})
+	return nil
+}
+
 func articlePhotoUpload(c *gin.Context, file *multipart.FileHeader) (string, error) {
 	userid := c.Param("userid")
 	log.Println("photo upload user id: ", userid)
 	folderName := "article"
 	folderPath := filepath.Join(config.PHOTO_PATH, userid, folderName)
+	if _, err := os.Stat(folderPath); os.IsNotExist(err) {
+		os.Mkdir(folderPath, 0777)
+		os.Chmod(folderPath, 0777)
+	}
+	log.Println(file.Filename)
+	dst := filepath.Join(folderPath, file.Filename)
+
+	log.Printf("file path: %s\n", folderPath)
+	log.Printf("file name : %s", file.Filename)
+
+	err := c.SaveUploadedFile(file, dst)
+	if err == nil && file.Filename != "" {
+		return file.Filename, err
+	}
+	return "", err
+}
+
+func articleVideoUpload(c *gin.Context, file *multipart.FileHeader) (string, error) {
+	userid := c.Param("userid")
+	folderName := "article"
+	folderPath := filepath.Join(config.VIDEO_PATH, userid, folderName)
 	if _, err := os.Stat(folderPath); os.IsNotExist(err) {
 		os.Mkdir(folderPath, 0777)
 		os.Chmod(folderPath, 0777)

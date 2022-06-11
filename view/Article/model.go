@@ -14,8 +14,12 @@ type ArticleSimpleInfoModel struct {
 }
 
 type ArticleInfoModel struct {
-	ID      int64     `json:"id"`
-	UserId  uint      `json:"userId"`
-	Date    time.Time `json:"date"`
-	Content string    `json:"content"`
+	ID        int64     `json:"id"`
+	UserId    uint      `json:"userId"`
+	Title     string    `json:"title"`
+	ImgUrl    string    `json:"imgUrl"`
+	Brief     string    `json:"brief"`
+	Content   string    `json:"content"`
+	Type      string    `json:"type"`
+	CreatedAt time.Time `json:"created_at"`
 }

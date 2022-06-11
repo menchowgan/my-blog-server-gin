@@ -25,7 +25,15 @@ func InsertArticle(article *model.Articles) error {
 }
 
 func Save(article *model.Articles) error {
-	return nil
+	dr := db.DB.GetDbW()
+	err := dr.Model(&model.Articles{}).Where("id = ?", article.ID).Updates(map[string]interface{}{
+		"title":   article.Title,
+		"imgUrl":  article.ImgUrl,
+		"type":    article.Type,
+		"brief":   article.Brief,
+		"content": article.Content,
+	}).Error
+	return err
 }
 
 func ArticleSimplaeInfosQueryByUserId(userId string) ([]model.Articles, error) {
@@ -50,16 +58,20 @@ func SearchArticleInfo(articleId string) (ArticleInfoModel, error) {
 	var a model.Articles
 
 	dr := db.DB.GetDbR()
-	err := dr.Select("id, userId, created_at, content").Where("id = ?", articleId).First(&a).Error
+	err := dr.Select("id, userId, created_at, title, imgUrl, brief, content, type").Where("id = ?", articleId).First(&a).Error
 	if err != nil {
 		return ArticleInfoModel{}, err
 	}
 
 	return ArticleInfoModel{
-		ID:      int64(a.ID),
-		UserId:  a.UserId,
-		Date:    a.CreatedAt,
-		Content: a.Content,
+		ID:        int64(a.ID),
+		UserId:    a.UserId,
+		CreatedAt: a.CreatedAt,
+		Content:   a.Content,
+		Type:      a.Type,
+		Title:     a.Title,
+		Brief:     a.Brief,
+		ImgUrl:    config.PHOTO_QUERY_PATH + strconv.Itoa(int(a.UserId)) + "/article/" + a.ImgUrl,
 	}, nil
 }
 

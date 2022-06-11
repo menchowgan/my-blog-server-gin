@@ -102,6 +102,10 @@ func main() {
 					Method:  http.MethodPost,
 					Handler: article.ArticlePhotosUPload,
 				}, {
+					Url:     "/video/upload/:userid", // 文章内视频上传
+					Method:  http.MethodPost,
+					Handler: article.ArticleVideoUpload,
+				}, {
 					Url:     "/upload", // 文章整体完整信息上传
 					Method:  http.MethodPost,
 					Handler: article.ArticlePost,

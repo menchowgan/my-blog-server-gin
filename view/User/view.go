@@ -28,7 +28,13 @@ func InsertUser(user *model.User) error {
 
 func Save(user *model.User) (*model.User, error) {
 	dw := db.DB.GetDbW()
-	err := dw.Model(&model.User{}).Where("id = ?", user.ID).Updates(map[string]interface{}{"nickname": user.Nickname, "hobbies": user.Hobbies, "gender": user.Gender, "brief": user.Brief, "avatar": user.Avatar}).Error
+	err := dw.Model(&model.User{}).Where("id = ?", user.ID).Updates(map[string]interface{}{
+		"nickname": user.Nickname,
+		"hobbies":  user.Hobbies,
+		"gender":   user.Gender,
+		"brief":    user.Brief,
+		"avatar":   user.Avatar,
+	}).Error
 	if err != nil {
 		return nil, err
 	}
