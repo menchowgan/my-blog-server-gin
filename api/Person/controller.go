@@ -2,12 +2,14 @@ package person
 
 import (
 	"fmt"
+	"gmc-blog-server/db"
 	"gmc-blog-server/model"
 	user "gmc-blog-server/view/User"
 	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"golang.org/x/crypto/bcrypt"
 )
 
 func PersonInfoPost(c *gin.Context) error {
@@ -98,4 +100,102 @@ func GetInfo(c *gin.Context) error {
 		})
 	}
 	return err
+}
+
+func Enroll(c *gin.Context) error {
+	var userEnroll model.UserEnroll
+
+	if err := c.ShouldBind(&userEnroll); err != nil {
+		return err
+	}
+	log.Printf("user name: %s; password: %s to enroll! ", userEnroll.UserName, userEnroll.Passwrod)
+
+	hash := createBcryptPassword(userEnroll.Passwrod)
+	if hash == "" {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code":    http.StatusInternalServerError,
+			"message": "用户注册失败（密码存储错误）",
+		})
+		return nil
+	}
+
+	user := &model.User{}
+	user.Nickname = userEnroll.UserName
+	user.Password = string(hash)
+	log.Println("new user:", user.Nickname, user.Password)
+
+	dw := db.DB.GetDbW()
+	err := dw.Create(user).Error
+	if err != nil {
+		return err
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"code":    http.StatusOK,
+		"message": "用户注册成功",
+		"data":    user.ID,
+	})
+	return nil
+}
+
+func Login(c *gin.Context) error {
+	var userLog model.UserEnroll
+
+	if err := c.ShouldBind(&userLog); err != nil {
+		return err
+	}
+	log.Printf("user name: %s; password: %s to login! ", userLog.UserName, userLog.Passwrod)
+
+	u, err := findUser(&userLog)
+	if err != nil {
+		return err
+	}
+
+	var ur model.User
+
+	for _, user := range u {
+		log.Printf("----user' s id is %d, name is %s, password is %s\n", user.ID, user.Nickname, user.Password)
+		if user.Password == "" {
+			continue
+		}
+		if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(userLog.Passwrod)); err == nil {
+			ur = user
+		}
+	}
+
+	log.Printf("found user' s id is %d name is %s, password is %s, avatar is %s\n", ur.ID, ur.Nickname, ur.Password, ur.Avatar)
+	if ur.ID > 0 {
+		c.JSON(http.StatusOK, gin.H{
+			"code":    http.StatusOK,
+			"message": "用户登录成功",
+			"data":    ur.ID,
+		})
+	} else {
+		c.JSON(http.StatusOK, gin.H{
+			"code":    http.StatusOK,
+			"message": "未找到用户信息",
+			"data":    nil,
+		})
+	}
+	return nil
+}
+
+func findUser(user *model.UserEnroll) ([]model.User, error) {
+	dr := db.DB.GetDbR()
+	var u []model.User
+
+	err := dr.Select("id, nickname, password, avatar").Where("nickname = ?", user.UserName).Find(&u).Error
+	if err != nil {
+		return []model.User{}, err
+	}
+
+	return u, nil
+}
+
+func createBcryptPassword(pwd string) string {
+	hash, err := bcrypt.GenerateFromPassword([]byte(pwd), bcrypt.DefaultCost)
+	if err != nil {
+		return ""
+	}
+	log.Println("password hash:", string(hash))
+	return string(hash)
 }
