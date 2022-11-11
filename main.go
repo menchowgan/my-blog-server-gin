@@ -57,9 +57,17 @@ func main() {
 					Method:  http.MethodGet,
 					Handler: person.GerUserBriefInfo,
 				}, {
-					Url:     "/get/:userid",
+					Url:     "/get/:userid", // 根据用户id获取用户信息
 					Method:  http.MethodGet,
 					Handler: person.GetInfo,
+				}, {
+					Url:     "/enroll", // 注册用户信息
+					Method:  http.MethodPost,
+					Handler: person.Enroll,
+				}, {
+					Url:     "/login", // 用户登录
+					Method:  http.MethodPost,
+					Handler: person.Login,
 				},
 			},
 			"/photo": {
