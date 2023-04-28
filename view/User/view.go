@@ -160,3 +160,16 @@ func GetUserAllInfo(id string) (UserEnrollModel, error) {
 		Avatar:    config.PHOTO_QUERY_PATH + id + "/" + user.Avatar,
 	}, nil
 }
+
+func FindUser(id string) (model.User, error) {
+	var user model.User
+	dr := db.DB.GetDbR()
+
+	err := dr.Select("id, nickname, fans, avatar").Where("id = ?", id).First(&user).Error
+	if err != nil {
+		return model.User{}, err
+	}
+	log.Println("user info: ", user)
+
+	return user, nil
+}

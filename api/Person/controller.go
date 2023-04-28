@@ -2,11 +2,16 @@ package person
 
 import (
 	"fmt"
+	"gmc-blog-server/config"
 	"gmc-blog-server/db"
 	"gmc-blog-server/model"
+	article "gmc-blog-server/view/Article"
+	music "gmc-blog-server/view/Music"
+	photos "gmc-blog-server/view/Photos"
 	user "gmc-blog-server/view/User"
 	"log"
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
@@ -179,6 +184,82 @@ func Login(c *gin.Context) error {
 	return nil
 }
 
+func FindSimpleInfo(c *gin.Context) error {
+	id := c.Param("id")
+	log.Println("user id", id)
+
+	info, err := getSimpleLifeInfo(id)
+
+	if err != nil {
+		return err
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"code":    http.StatusOK,
+		"message": "查询simple life信息成功",
+		"data":    info,
+	})
+
+	return nil
+}
+
+func getSimpleLifeInfo(id string) (user.PsersonSimpleIinfo, error) {
+	photosChan := make(chan model.Photos)
+	photoError := false
+
+	musicChan := make(chan model.Music)
+	musicError := false
+
+	articleChan := make(chan model.Articles)
+	articleError := false
+
+	userChan := make(chan model.User)
+	userError := false
+
+	go searchPhoto(id, photosChan)
+	go searchMusic(id, musicChan)
+	go searchArticle(id, articleChan)
+	go searchUser(id, userChan)
+
+	userInfo := user.PsersonSimpleIinfo{}
+
+	for {
+		if photoError && musicError && articleError && userError {
+			break
+		}
+
+		select {
+		case photosInfo := <-photosChan:
+			imgUrls := []photos.PhotoInfo{}
+			if photosInfo.ImgUrls != "" && len(photosInfo.ImgUrls) > 0 {
+				urls := strings.Split(photosInfo.ImgUrls, ";")
+				for idx, url := range urls {
+					model := photos.PhotoInfo{
+						ID:  uint(idx + 1),
+						Url: config.PHOTO_QUERY_PATH + id + "/" + url,
+					}
+					imgUrls = append(imgUrls, model)
+				}
+			}
+
+			userInfo.Photos = imgUrls
+			photoError = true
+		case musics := <-musicChan:
+			userInfo.Musics = musics
+			musicError = true
+		case oneArticle := <-articleChan:
+			userInfo.Article = oneArticle
+			articleError = true
+		case userI := <-userChan:
+			userInfo.Avatar = userI.Avatar
+			userInfo.Nickname = userI.Nickname
+			userError = true
+		}
+	}
+
+	return userInfo, nil
+}
+
 func findUser(user *model.UserEnroll) ([]model.User, error) {
 	dr := db.DB.GetDbR()
 	var u []model.User
@@ -198,4 +279,24 @@ func createBcryptPassword(pwd string) string {
 	}
 	log.Println("password hash:", string(hash))
 	return string(hash)
+}
+
+func searchMusic(id string, musicChan chan model.Music) {
+	info, _ := music.MusicQueryByUserIdSimplaeLife(id)
+	musicChan <- info
+}
+
+func searchArticle(id string, articleChan chan model.Articles) {
+	info, _ := article.ArticleQueryByUserIdSimplaeLife(id)
+	articleChan <- info
+}
+
+func searchPhoto(id string, photoChan chan model.Photos) {
+	info, _ := photos.PhotosQueryByUserId(id)
+	photoChan <- info
+}
+
+func searchUser(id string, userChan chan model.User) {
+	info, _ := user.FindUser(id)
+	userChan <- info
 }
