@@ -101,3 +101,21 @@ func SearchArticleInfoByType(userid string, atype string) ([]ArticleSimpleInfoMo
 
 	return as, nil
 }
+
+func ArticleQueryByUserIdSimplaeLife(userId string) (model.Articles, error) {
+	dr := db.DB.GetDbR()
+
+	log.Println("user id: ", userId)
+
+	var articleSI model.Articles
+	err := dr.Select("id, userId, imgUrl, title, brief, created_at").Where("userId = ?", userId).Order("created_at desc").Limit(1).First(&articleSI).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			log.Println("未找到数据")
+		} else {
+			return model.Articles{}, err
+		}
+	}
+
+	return articleSI, nil
+}

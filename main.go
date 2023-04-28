@@ -68,6 +68,10 @@ func main() {
 					Url:     "/login", // 用户登录
 					Method:  http.MethodPost,
 					Handler: person.Login,
+				}, {
+					Url:     "/simple-life/:id", // simple-life 网站首页查询
+					Method:  http.MethodPost,
+					Handler: person.FindSimpleInfo,
 				},
 			},
 			"/photo": {
