@@ -40,3 +40,21 @@ func SearchByUserId(userid string) ([]VideoInfo, error) {
 	}
 	return videosArray, nil
 }
+
+func SearchSimpleLifeByUserId(id string) (VideoInfo, error) {
+	dr := db.DB.GetDbR()
+	var video model.Video
+	err := dr.Where("userId = ?", id).Order("created_at desc").First(&video).Error
+	if err != nil {
+		return VideoInfo{}, err
+	}
+	return VideoInfo{
+		ID:        video.ID,
+		UserId:    int(video.UserId),
+		Title:     video.Title,
+		Artist:    video.Artist,
+		Evalution: video.Evalution,
+		VideoUrl:  config.VIDEO_QUERY_PATH + id + "/" + video.VideoUrl,
+		Avatar:    config.PHOTO_QUERY_PATH + id + "/" + video.Avatar,
+	}, nil
+}

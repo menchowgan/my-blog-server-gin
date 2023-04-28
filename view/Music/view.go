@@ -44,18 +44,18 @@ func SearchByUserId(userid string) ([]MusicInfo, error) {
 	return audioArray, nil
 }
 
-func MusicQueryByUserIdSimplaeLife(userId string) (model.Music, error) {
+func MusicQueryByUserIdSimplaeLife(userId string) ([]model.Music, error) {
 	dr := db.DB.GetDbR()
 
 	log.Println("user id: ", userId)
 
-	var musicSI model.Music
-	err := dr.Where("userId = ?", userId).Order("created_at desc").First(&musicSI).Error
+	var musicSI []model.Music
+	err := dr.Where("userId = ?", userId).Order("created_at desc").Find(&musicSI).Limit(5).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			log.Println("未找到数据")
 		} else {
-			return model.Music{}, err
+			return []model.Music{}, err
 		}
 	}
 

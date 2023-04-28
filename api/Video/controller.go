@@ -15,6 +15,22 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+func Query(c *gin.Context) error {
+	userid := c.Param("id")
+	vi, err := video.SearchByUserId(userid)
+
+	if err != nil {
+		return err
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"code":    http.StatusOK,
+		"message": "查询 video 成功",
+		"data":    vi,
+	})
+	return nil
+}
+
 func VideoUpload(c *gin.Context) error {
 	file, err := c.FormFile("file")
 	if err != nil {

@@ -1,7 +1,6 @@
 package user
 
 import (
-	"gmc-blog-server/model"
 	article "gmc-blog-server/view/Article"
 	music "gmc-blog-server/view/Music"
 	photos "gmc-blog-server/view/Photos"
@@ -43,8 +42,9 @@ type PsersonSimpleIinfo struct {
 	Avatar             string                           `json:"avatar"`
 	Photos             []photos.PhotoInfo               `json:"photos"`
 	ArticleSimpleInfos []article.ArticleSimpleInfoModel `json:"articleSimpleInfos"`
-	Musics             model.Music                      `json:"musics"`
-	Article            model.Articles                   `json:"article"`
+	Musics             []music.MusicInfo                `json:"musics"`
+	Article            article.ArticleSimpleInfoModel   `json:"article"`
+	Video              video.VideoInfo                  `json:"video"`
 }
 
 type PsersonBrief struct {
