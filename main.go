@@ -102,6 +102,10 @@ func main() {
 					Url:     "/user/upload", // 用户收藏歌曲完整信息上传
 					Method:  http.MethodPost,
 					Handler: music.UserMusicUpload,
+				}, {
+					Url:     "/query/:id",
+					Method:  http.MethodPost,
+					Handler: music.Query,
 				},
 			},
 			"/article": {
@@ -144,6 +148,10 @@ func main() {
 					Url:     "/user/upload",
 					Method:  http.MethodPost,
 					Handler: video.UserVideoUpload,
+				}, {
+					Url:     "/query/:id",
+					Method:  http.MethodPost,
+					Handler: video.Query,
 				},
 			},
 		},

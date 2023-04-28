@@ -15,6 +15,22 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+func Query(c *gin.Context) error {
+	userid := c.Param("id")
+	mu, err := music.SearchByUserId(userid)
+
+	if err != nil {
+		return err
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"code":    http.StatusOK,
+		"message": "查询 music 成功",
+		"data":    mu,
+	})
+	return nil
+}
+
 func MusicCoverUpload(c *gin.Context) error {
 	file, err := c.FormFile("file")
 	log.Println("photo file: ", file.Filename)

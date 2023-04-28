@@ -9,6 +9,7 @@ import (
 	music "gmc-blog-server/view/Music"
 	photos "gmc-blog-server/view/Photos"
 	user "gmc-blog-server/view/User"
+	video "gmc-blog-server/view/Video"
 	"log"
 	"net/http"
 	"strings"
@@ -194,6 +195,14 @@ func FindSimpleInfo(c *gin.Context) error {
 		return err
 	}
 
+	if info.ID == 0 {
+		c.JSON(http.StatusOK, gin.H{
+			"code":    10010,
+			"message": "用户信息未找到",
+			"data":    nil,
+		})
+	}
+
 	c.JSON(http.StatusOK, gin.H{
 		"code":    http.StatusOK,
 		"message": "查询simple life信息成功",
@@ -207,11 +216,14 @@ func getSimpleLifeInfo(id string) (user.PsersonSimpleIinfo, error) {
 	photosChan := make(chan model.Photos)
 	photoError := false
 
-	musicChan := make(chan model.Music)
+	musicChan := make(chan []model.Music)
 	musicError := false
 
 	articleChan := make(chan model.Articles)
 	articleError := false
+
+	videoChan := make(chan video.VideoInfo)
+	videoError := false
 
 	userChan := make(chan model.User)
 	userError := false
@@ -220,11 +232,12 @@ func getSimpleLifeInfo(id string) (user.PsersonSimpleIinfo, error) {
 	go searchMusic(id, musicChan)
 	go searchArticle(id, articleChan)
 	go searchUser(id, userChan)
+	go searchVideo(id, videoChan)
 
 	userInfo := user.PsersonSimpleIinfo{}
 
 	for {
-		if photoError && musicError && articleError && userError {
+		if photoError && musicError && articleError && userError && videoError {
 			break
 		}
 
@@ -245,14 +258,42 @@ func getSimpleLifeInfo(id string) (user.PsersonSimpleIinfo, error) {
 			userInfo.Photos = imgUrls
 			photoError = true
 		case musics := <-musicChan:
-			userInfo.Musics = musics
+			log.Println("simple info: found music:", musics)
+			musicModel := []music.MusicInfo{}
+			for _, m := range musics {
+				if m.ID != 0 {
+					musicModel = append(musicModel, music.MusicInfo{
+						ID:        m.ID,
+						Artist:    m.Artist,
+						Title:     m.Title,
+						AudioUrl:  config.VIDEO_QUERY_PATH + id + "/" + m.AudioUrl,
+						Evalution: m.Evalution,
+					})
+				}
+			}
+
+			userInfo.Musics = musicModel
 			musicError = true
 		case oneArticle := <-articleChan:
-			userInfo.Article = oneArticle
+			log.Println("simple info: found article:", oneArticle)
+			oneArticleModel := article.ArticleSimpleInfoModel{
+				ID:     int64(oneArticle.ID),
+				Brief:  oneArticle.Brief,
+				Title:  oneArticle.Title,
+				UserId: oneArticle.UserId,
+				ImgUrl: config.PHOTO_QUERY_PATH + id + "/" + oneArticle.ImgUrl,
+				Date:   oneArticle.CreatedAt,
+			}
+
+			userInfo.Article = oneArticleModel
 			articleError = true
+		case videoI := <-videoChan:
+			userInfo.Video = videoI
+			videoError = true
 		case userI := <-userChan:
-			userInfo.Avatar = userI.Avatar
+			userInfo.Avatar = config.PHOTO_QUERY_PATH + id + "/" + userI.Avatar
 			userInfo.Nickname = userI.Nickname
+			userInfo.ID = userI.ID
 			userError = true
 		}
 	}
@@ -281,7 +322,7 @@ func createBcryptPassword(pwd string) string {
 	return string(hash)
 }
 
-func searchMusic(id string, musicChan chan model.Music) {
+func searchMusic(id string, musicChan chan []model.Music) {
 	info, _ := music.MusicQueryByUserIdSimplaeLife(id)
 	musicChan <- info
 }
@@ -299,4 +340,9 @@ func searchPhoto(id string, photoChan chan model.Photos) {
 func searchUser(id string, userChan chan model.User) {
 	info, _ := user.FindUser(id)
 	userChan <- info
+}
+
+func searchVideo(id string, videoChan chan video.VideoInfo) {
+	info, _ := video.SearchSimpleLifeByUserId(id)
+	videoChan <- info
 }
