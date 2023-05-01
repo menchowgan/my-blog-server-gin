@@ -14,6 +14,22 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+func Query(c *gin.Context) error {
+	userid := c.Param("userid")
+	a, err := article.ArticleSimplaeInfosQueryByUserId(userid)
+	if err != nil {
+		return err
+	}
+	articleSIs := article.GetArticleInfos(a, userid)
+
+	c.JSON(http.StatusOK, gin.H{
+		"code":    http.StatusOK,
+		"message": "查询 article 成功",
+		"data":    articleSIs,
+	})
+	return nil
+}
+
 func ArticlePost(c *gin.Context) error {
 	var a model.Articles
 

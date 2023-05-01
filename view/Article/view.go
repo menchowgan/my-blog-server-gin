@@ -119,3 +119,20 @@ func ArticleQueryByUserIdSimplaeLife(userId string) (model.Articles, error) {
 
 	return articleSI, nil
 }
+
+func GetArticleInfos(a []model.Articles, userid string) []ArticleSimpleInfoModel {
+	var articleSIs []ArticleSimpleInfoModel //id, userId, imgUrl, title, content, created_at
+	if len(a) > 0 {
+		for _, a := range a {
+			articleSIs = append(articleSIs, ArticleSimpleInfoModel{
+				ID:     int64(a.ID),
+				Title:  a.Title,
+				UserId: a.UserId,
+				ImgUrl: config.PHOTO_QUERY_PATH + userid + "/article/" + a.ImgUrl,
+				Brief:  a.Brief,
+				Date:   a.CreatedAt,
+			})
+		}
+	}
+	return articleSIs
+}

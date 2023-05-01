@@ -133,6 +133,10 @@ func main() {
 					Url:     "/query-by-type/:userid/:type", // 文章查询 使用类型名进行模糊查询
 					Method:  http.MethodGet,
 					Handler: article.ArticleQueryByType,
+				}, {
+					Url:     "/query-by-userid/:userid", // 文章查询 使用userid
+					Method:  http.MethodPost,
+					Handler: article.Query,
 				},
 			},
 			"/video": {
