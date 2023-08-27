@@ -42,7 +42,7 @@ func Search(userId int) (PlanModel, error) {
 
 	planModel := PlanModel{}
 	if err != nil {
-		return planModel, err
+		return planModel, nil
 	}
 
 	planModel.Content = m.Content
