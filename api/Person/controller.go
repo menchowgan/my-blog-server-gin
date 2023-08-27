@@ -131,8 +131,10 @@ func Enroll(c *gin.Context) error {
 	log.Println("new user:", user.Nickname, user.Password)
 
 	dw := db.DB.GetDbW()
-	err := dw.Create(user).Error
+	transaction := dw.Begin()
+	err := transaction.Create(user).Error
 	if err != nil {
+		transaction.Rollback()
 		return err
 	}
 	c.JSON(http.StatusOK, gin.H{
@@ -140,6 +142,7 @@ func Enroll(c *gin.Context) error {
 		"message": "用户注册成功",
 		"data":    user.ID,
 	})
+	transaction.Commit()
 	return nil
 }
 
@@ -266,8 +269,9 @@ func getSimpleLifeInfo(id string) (user.PsersonSimpleIinfo, error) {
 						ID:        m.ID,
 						Artist:    m.Artist,
 						Title:     m.Title,
-						AudioUrl:  config.VIDEO_QUERY_PATH + id + "/" + m.AudioUrl,
+						AudioUrl:  config.MUSCI_QUERY_PATH + id + "/" + m.AudioUrl,
 						Evalution: m.Evalution,
+						Avatar:    config.MUSCI_QUERY_PATH + id + "/" + m.Avatar,
 					})
 				}
 			}
@@ -281,7 +285,7 @@ func getSimpleLifeInfo(id string) (user.PsersonSimpleIinfo, error) {
 				Brief:  oneArticle.Brief,
 				Title:  oneArticle.Title,
 				UserId: oneArticle.UserId,
-				ImgUrl: config.PHOTO_QUERY_PATH + id + "/" + oneArticle.ImgUrl,
+				ImgUrl: config.PHOTO_QUERY_PATH + id + "/" + "article" + "/" + oneArticle.ImgUrl,
 				Date:   oneArticle.CreatedAt,
 			}
 

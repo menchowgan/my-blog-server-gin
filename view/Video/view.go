@@ -48,6 +48,7 @@ func SearchSimpleLifeByUserId(id string) (VideoInfo, error) {
 	if err != nil {
 		return VideoInfo{}, err
 	}
+	log.Println("searched video", video.Title, video.Avatar, video.ID)
 	return VideoInfo{
 		ID:        video.ID,
 		UserId:    int(video.UserId),
