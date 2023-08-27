@@ -25,6 +25,7 @@ func AvatarUpload(c *gin.Context) error {
 
 func UserPhotosDelete(c *gin.Context) error {
 	body, _ := io.ReadAll(c.Request.Body)
+	log.Println("to delete body", body)
 
 	var urlBody deleteUrlBody
 	err := json.Unmarshal(body, &urlBody)
