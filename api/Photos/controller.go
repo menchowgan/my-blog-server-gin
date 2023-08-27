@@ -5,7 +5,7 @@ import (
 	fileapi "gmc-blog-server/api/File"
 	"gmc-blog-server/config"
 	photos "gmc-blog-server/view/Photos"
-	"io/ioutil"
+	"io"
 	"log"
 	"mime/multipart"
 	"net/http"
@@ -24,7 +24,7 @@ func AvatarUpload(c *gin.Context) error {
 }
 
 func UserPhotosDelete(c *gin.Context) error {
-	body, _ := ioutil.ReadAll(c.Request.Body)
+	body, _ := io.ReadAll(c.Request.Body)
 
 	var urlBody deleteUrlBody
 	err := json.Unmarshal(body, &urlBody)
