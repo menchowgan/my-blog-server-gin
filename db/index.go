@@ -125,52 +125,25 @@ func dbConnect(user, pass, addr, dbName string) (*gorm.DB, error) {
 
 func InitTables() {
 	dw := DB.GetDbW()
-	dr := DB.GetDbR()
 
 	dw.Transaction(func(tx *gorm.DB) error {
 		var err error
-		has := dr.Migrator().HasTable(&model.User{})
+		var models [6]interface{}
+		models[0] = &model.User{}
+		models[1] = &model.Articles{}
+		models[2] = &model.Photos{}
+		models[3] = &model.Music{}
+		models[4] = &model.Video{}
+		models[5] = &model.Plan{}
 
-		if !has {
-			err = dw.AutoMigrate(&model.User{})
-			if err != nil {
-				return err
-			}
-		}
+		for _, m := range models {
+			has := tx.Migrator().HasTable(m)
 
-		has = dr.Migrator().HasTable(&model.Articles{})
-
-		if !has {
-			err = dw.AutoMigrate(&model.Articles{})
-			if err != nil {
-				return err
-			}
-		}
-
-		has = dr.Migrator().HasTable(&model.Photos{})
-
-		if !has {
-			err = dw.AutoMigrate(&model.Photos{})
-			if err != nil {
-				return err
-			}
-		}
-
-		has = dr.Migrator().HasTable(&model.Music{})
-
-		if !has {
-			err = dw.AutoMigrate(&model.Music{})
-			if err != nil {
-				return err
-			}
-		}
-
-		has = dr.Migrator().HasTable(&model.Video{})
-
-		if !has {
-			err = dw.AutoMigrate(&model.Video{})
-			if err != nil {
-				return err
+			if !has {
+				err = tx.AutoMigrate(m)
+				if err != nil {
+					return err
+				}
 			}
 		}
 

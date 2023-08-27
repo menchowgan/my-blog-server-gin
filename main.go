@@ -11,6 +11,7 @@ import (
 	person "gmc-blog-server/api/Person"
 	photos "gmc-blog-server/api/Photos"
 	video "gmc-blog-server/api/Video"
+	plan "gmc-blog-server/api/Plan"
 	db "gmc-blog-server/db"
 	router "gmc-blog-server/router"
 )
@@ -158,6 +159,17 @@ func main() {
 					Handler: video.Query,
 				},
 			},
+      "plan": {
+        {
+          Url: "/submit",
+          Method: http.MethodPost,
+          Handler: plan.Submit,
+        }, {
+          Url: "/search/:userId",
+          Method: http.MethodGet,
+          Handler: plan.Search,
+        },
+      },
 		},
 	}
 
