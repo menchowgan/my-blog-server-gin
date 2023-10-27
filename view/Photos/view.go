@@ -1,13 +1,17 @@
 package photos
 
 import (
+	"encoding/json"
 	"errors"
 	"gmc-blog-server/db"
 	"gmc-blog-server/model"
+	r "gmc-blog-server/redis"
 	"log"
 	"strconv"
 	"strings"
+	"time"
 
+	"github.com/go-redis/redis/v8"
 	"gorm.io/gorm"
 )
 
@@ -44,20 +48,33 @@ func PhotoUpdate(fileName string, userId string) error {
 }
 
 func PhotosQueryByUserId(userId string) (model.Photos, error) {
-	dr := db.DB.GetDbR()
-
 	log.Println("user id: ", userId)
-
+	rKey := r.GetKey("photo", userId)
+	s, err := r.RedisDb.Get(rKey).Result()
 	var photos model.Photos
-	err := dr.Where("userId = ?", userId).First(&photos).Error
-	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			log.Println("未找到数据")
-		} else {
-			return model.Photos{}, err
+	if err != nil || err == redis.Nil {
+		dr := db.DB.GetDbR()
+		err := dr.Where("userId = ?", userId).First(&photos).Error
+		if err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				log.Println("未找到数据")
+			} else {
+				return model.Photos{}, err
+			}
+		}
+		log.Println("photos urls: ", userId, photos.ImgUrls)
+		if ps, err := json.Marshal(&photos); err == nil {
+			r.RedisDb.Set(rKey, ps, 96*time.Hour).Result()
+		}
+	} else {
+		if s != "" {
+			log.Println("cached photos", s)
+			err := json.Unmarshal([]byte(s), &photos)
+			if err != nil {
+				return photos, err
+			}
 		}
 	}
-	log.Println("photos urls: ", userId, photos.ImgUrls)
 
 	return photos, nil
 }

@@ -1,9 +1,11 @@
 package user
 
 import (
+	"encoding/json"
 	"gmc-blog-server/config"
 	"gmc-blog-server/db"
 	"gmc-blog-server/model"
+	myRedis "gmc-blog-server/redis"
 	article "gmc-blog-server/view/Article"
 	music "gmc-blog-server/view/Music"
 	photos "gmc-blog-server/view/Photos"
@@ -11,6 +13,9 @@ import (
 	"log"
 	"strconv"
 	"strings"
+	"time"
+
+	"github.com/go-redis/redis/v8"
 )
 
 func InsertUser(user *model.User) error {
@@ -38,6 +43,7 @@ func Save(user *model.User) (*model.User, error) {
 	if err != nil {
 		return nil, err
 	}
+	searchAndUpdateCache(strconv.Itoa(int(user.ID)))
 	return user, nil
 }
 
@@ -162,14 +168,36 @@ func GetUserAllInfo(id string) (UserEnrollModel, error) {
 }
 
 func FindUser(id string) (model.User, error) {
+	s, err := myRedis.RedisDb.Get(myRedis.GetKey("user", id)).Result()
+	log.Println("cache searched", s, err)
 	var user model.User
+
+	if err != nil || err == redis.Nil {
+		return searchAndUpdateCache(id)
+	} else {
+		if s != "" {
+			log.Println("cached user", s)
+			if err := json.Unmarshal([]byte(s), &user); err == nil {
+				return user, nil
+			}
+		}
+		return user, nil
+	}
+
+}
+
+func searchAndUpdateCache(id string) (model.User, error) {
 	dr := db.DB.GetDbR()
+	var user model.User
 
 	err := dr.Select("id, nickname, fans, avatar").Where("id = ?", id).First(&user).Error
 	if err != nil {
-		return model.User{}, err
+		return user, err
 	}
 	log.Println("user info: ", user)
+	if b, err := json.Marshal(&user); err == nil {
+		_, err = myRedis.RedisDb.Set(myRedis.GetKey("user", id), b, 96*time.Hour).Result()
+	}
 
 	return user, nil
 }
