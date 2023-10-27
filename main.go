@@ -7,6 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	db "gmc-blog-server/db"
+	redis "gmc-blog-server/redis"
 	router "gmc-blog-server/router"
   middlewares "gmc-blog-server/middlewares"
 )
@@ -29,6 +30,7 @@ func main() {
 	}()
 
 	db.InitTables()
+  redis.Init()
 
   r.Use(middlewares.LogValidator())
   r.Use(middlewares.TestMiddleware())

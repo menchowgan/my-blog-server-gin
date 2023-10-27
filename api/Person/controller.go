@@ -12,6 +12,7 @@ import (
 	video "gmc-blog-server/view/Video"
 	"log"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -64,6 +65,21 @@ func PersonInfoPost(c *gin.Context) error {
 func GerUserSimpleInfo(c *gin.Context) error {
 	id := c.Param("id")
 	fmt.Println(id)
+
+	idNumb, err := strconv.Atoi(id)
+
+	if err != nil {
+		return err
+	}
+
+	if idNumb <= 0 {
+		c.JSON(http.StatusOK, gin.H{
+			"code":    http.ErrBodyNotAllowed,
+			"data":    nil,
+			"message": "查询id格式错误，需大于零",
+		})
+		return nil
+	}
 
 	user, err := user.GerUserInfo(id)
 	if err != nil {
