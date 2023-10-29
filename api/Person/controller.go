@@ -5,13 +5,14 @@ import (
 	"gmc-blog-server/config"
 	"gmc-blog-server/db"
 	"gmc-blog-server/model"
+	"gmc-blog-server/response"
+	jwt "gmc-blog-server/token"
 	article "gmc-blog-server/view/Article"
 	music "gmc-blog-server/view/Music"
 	photos "gmc-blog-server/view/Photos"
 	user "gmc-blog-server/view/User"
 	video "gmc-blog-server/view/Video"
 	"log"
-	"net/http"
 	"strconv"
 	"strings"
 
@@ -36,11 +37,8 @@ func PersonInfoPost(c *gin.Context) error {
 
 		log.Println("update successful")
 		log.Println(person)
-		c.JSON(http.StatusOK, gin.H{
-			"message": "接受成功",
-			"code":    0,
-			"data":    person,
-		})
+
+		response.Success(person, "接受成功", c)
 
 		return nil
 	} else {
@@ -51,45 +49,28 @@ func PersonInfoPost(c *gin.Context) error {
 		}
 		log.Println("insert successful")
 		log.Println(person.ID)
-
-		c.JSON(http.StatusOK, gin.H{
-			"message": "接受成功",
-			"code":    0,
-			"data":    person,
-		})
-
+		response.Success(person, "接受成功", c)
 		return nil
 	}
 }
 
 func GerUserSimpleInfo(c *gin.Context) error {
-	id := c.Param("id")
+	id := c.GetInt("userId")
 	fmt.Println(id)
 
-	idNumb, err := strconv.Atoi(id)
-
-	if err != nil {
-		return err
-	}
-
-	if idNumb <= 0 {
-		c.JSON(http.StatusOK, gin.H{
-			"code":    http.ErrBodyNotAllowed,
-			"data":    nil,
-			"message": "查询id格式错误，需大于零",
-		})
+	if id <= 0 {
+		response.ServerError(nil, "查询id格式错误，需大于零", c)
 		return nil
 	}
 
-	user, err := user.GerUserInfo(id)
+	idNumb := strconv.Itoa(id)
+
+	user, err := user.GerUserInfo(idNumb)
 	if err != nil {
 		return err
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"code": http.StatusOK,
-		"data": user,
-	})
+	response.Success(user, "", c)
 
 	return nil
 }
@@ -103,10 +84,7 @@ func GerUserBriefInfo(c *gin.Context) error {
 		return err
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"code": http.StatusOK,
-		"data": user,
-	})
+	response.Success(user, "", c)
 
 	return nil
 }
@@ -115,11 +93,7 @@ func GetInfo(c *gin.Context) error {
 	id := c.Param("userid")
 	u, err := user.GetUserAllInfo(id)
 	if err == nil {
-		c.JSON(http.StatusOK, gin.H{
-			"code":    http.StatusOK,
-			"message": "查询用户信息成功",
-			"data":    u,
-		})
+		response.Success(u, "查询用户信息成功", c)
 	}
 	return err
 }
@@ -134,10 +108,8 @@ func Enroll(c *gin.Context) error {
 
 	hash := createBcryptPassword(userEnroll.Passwrod)
 	if hash == "" {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"code":    http.StatusInternalServerError,
-			"message": "用户注册失败（密码存储错误）",
-		})
+		response.ServerError(nil, "用户注册失败（密码存储错误）", c)
+
 		return nil
 	}
 
@@ -153,11 +125,7 @@ func Enroll(c *gin.Context) error {
 		transaction.Rollback()
 		return err
 	}
-	c.JSON(http.StatusOK, gin.H{
-		"code":    http.StatusOK,
-		"message": "用户注册成功",
-		"data":    user.ID,
-	})
+	response.Success(user.ID, "用户注册成功", c)
 	transaction.Commit()
 	return nil
 }
@@ -189,17 +157,19 @@ func Login(c *gin.Context) error {
 
 	log.Printf("found user' s id is %d name is %s, password is %s, avatar is %s\n", ur.ID, ur.Nickname, ur.Password, ur.Avatar)
 	if ur.ID > 0 {
-		c.JSON(http.StatusOK, gin.H{
-			"code":    http.StatusOK,
-			"message": "用户登录成功",
-			"data":    ur.ID,
-		})
+		token, err := jwt.CreateToken(int(ur.ID), ur.Nickname)
+		if err != nil {
+			response.Fail(
+				response.TokenCreateFailed,
+				nil,
+				response.StatusText(response.TokenCreateFailed),
+				c,
+			)
+			return err
+		}
+		response.Success(token, "用户注册成功", c)
 	} else {
-		c.JSON(http.StatusOK, gin.H{
-			"code":    http.StatusOK,
-			"message": "未找到用户信息",
-			"data":    nil,
-		})
+		response.Success(nil, "未找到用户信息", c)
 	}
 	return nil
 }
@@ -215,18 +185,10 @@ func FindSimpleInfo(c *gin.Context) error {
 	}
 
 	if info.ID == 0 {
-		c.JSON(http.StatusOK, gin.H{
-			"code":    10010,
-			"message": "用户信息未找到",
-			"data":    nil,
-		})
+		response.Get(10010, nil, "用户信息未找到", false, c)
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"code":    http.StatusOK,
-		"message": "查询simple life信息成功",
-		"data":    info,
-	})
+	response.Success(info, "查询simple life信息成功", c)
 
 	return nil
 }
