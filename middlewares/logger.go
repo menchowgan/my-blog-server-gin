@@ -9,6 +9,7 @@ import (
 func LogValidator() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		log.Println("Loging checker")
+		log.Println("path", ctx.FullPath())
 		ctx.Next()
 	}
 }

@@ -1,15 +1,15 @@
 package main
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 
 	db "gmc-blog-server/db"
+	middlewares "gmc-blog-server/middlewares"
 	redis "gmc-blog-server/redis"
+	"gmc-blog-server/response"
 	router "gmc-blog-server/router"
-  middlewares "gmc-blog-server/middlewares"
 )
 
 func main() {
@@ -30,27 +30,21 @@ func main() {
 	}()
 
 	db.InitTables()
-  redis.Init()
+	redis.Init()
 
-  r.Use(middlewares.LogValidator())
-  r.Use(middlewares.TestMiddleware())
+	r.Use(middlewares.LogValidator())
+	r.Use(middlewares.TestMiddleware())
 
 	router.Get(r, "/hello", func(ctx *gin.Context) error {
-		ctx.JSON(http.StatusOK, gin.H{
-			"message": ctx.Request.Header,
-		})
+		response.Success(nil, "Hi~~~~~~", ctx)
 		return nil
 	})
 
 	groupMap := router.CreateRouter()
 
 	router.Group(r, groupMap)
-
 	r.NoRoute(func(ctx *gin.Context) {
-		fmt.Println("------no route")
-		ctx.JSON(http.StatusNotFound, gin.H{
-			"message": "陆游不存在",
-		})
+		response.Fail(http.StatusNotFound, nil, "陆游不存在", ctx)
 	})
 
 	r.Run(":8888")
