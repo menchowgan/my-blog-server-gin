@@ -4,11 +4,11 @@ import (
 	fileapi "gmc-blog-server/api/File"
 	"gmc-blog-server/config"
 	"gmc-blog-server/model"
+	"gmc-blog-server/response"
 	music "gmc-blog-server/view/Music"
 	photos "gmc-blog-server/view/Photos"
 	"log"
 	"mime/multipart"
-	"net/http"
 	"os"
 	"path/filepath"
 
@@ -23,11 +23,7 @@ func Query(c *gin.Context) error {
 		return err
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"code":    http.StatusOK,
-		"message": "查询 music 成功",
-		"data":    mu,
-	})
+	response.Success(mu, "查询 music 成功", c)
 	return nil
 }
 
@@ -37,18 +33,14 @@ func MusicCoverUpload(c *gin.Context) error {
 	if err == nil {
 		filename, err := coverUpload(c, file)
 		if err == nil && filename != "" {
-			c.JSON(http.StatusOK, gin.H{
-				"code":    http.StatusOK,
-				"success": true,
-				"data":    "cover/" + file.Filename,
-			})
+			response.Success("cover/"+file.Filename, "", c)
 			return nil
 		}
-		c.JSON(photos.AvatarUploadFailed, gin.H{
-			"code":    photos.AvatarUploadFailed,
-			"data":    nil,
-			"message": photos.StatusText(photos.AvatarUploadFailed),
-		})
+		response.Fail(
+			photos.AvatarUploadFailed,
+			nil,
+			photos.StatusText(photos.AvatarUploadFailed),
+			c)
 		return nil
 	}
 	return err
@@ -74,11 +66,7 @@ func UserMusicUpload(c *gin.Context) error {
 		log.Println(audioId)
 		audio.ID = audioId
 
-		c.JSON(http.StatusOK, gin.H{
-			"message": "接受成功",
-			"code":    0,
-			"data":    audio,
-		})
+		response.Success(audio, "接受成功", c)
 		return nil
 	}
 
@@ -94,11 +82,7 @@ func MusicUpload(c *gin.Context) error {
 	if err != nil {
 		return err
 	}
-	c.JSON(http.StatusOK, gin.H{
-		"code":    http.StatusOK,
-		"data":    filename,
-		"message": "音频上传成功：" + filename,
-	})
+	response.Success(filename, "音频上传成功："+filename, c)
 	return nil
 }
 
