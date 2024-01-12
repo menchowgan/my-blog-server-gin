@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	fileapi "gmc-blog-server/api/File"
 	"gmc-blog-server/config"
+	"gmc-blog-server/response"
 	photos "gmc-blog-server/view/Photos"
 	"io"
 	"log"
@@ -46,18 +47,13 @@ func UserPhotosDelete(c *gin.Context) error {
 	err = deletePicture(uri)
 	if err != nil {
 		if os.IsNotExist(err) {
-			c.JSON(http.StatusNotFound, gin.H{
-				"code":    http.StatusNotFound,
-				"message": "文件未找到，无法删除",
-			})
+			response.Fail(http.StatusNotFound, nil, "文件未找到，无法删除", c)
 			return nil
 		}
 		return err
 	}
-	c.JSON(http.StatusOK, gin.H{
-		"code":    http.StatusOK,
-		"message": "删除成功",
-	})
+
+	response.Success(nil, "删除成功", c)
 
 	return nil
 }
@@ -77,10 +73,7 @@ func UserPhotosUpload(c *gin.Context) error {
 		return err
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"code":    http.StatusOK,
-		"message": "图片上传成功",
-	})
+	response.Success(nil, "图片上传成功", c)
 
 	return nil
 }
@@ -91,18 +84,13 @@ func PhotoUpload(c *gin.Context) error {
 	if err == nil {
 		filename, err := photoUpload(c, file)
 		if err == nil && filename != "" {
-			c.JSON(http.StatusOK, gin.H{
-				"code":    http.StatusOK,
-				"success": true,
-				"data":    file.Filename,
-			})
+			response.Success(file.Filename, "照片上传成功", c)
 			return nil
 		}
-		c.JSON(photos.AvatarUploadFailed, gin.H{
-			"code":    photos.AvatarUploadFailed,
-			"data":    nil,
-			"message": photos.StatusText(photos.AvatarUploadFailed),
-		})
+		response.Fail(
+			photos.AvatarUploadFailed,
+			nil,
+			photos.StatusText(photos.AvatarUploadFailed), c)
 		return nil
 	}
 	return err

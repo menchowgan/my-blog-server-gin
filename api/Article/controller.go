@@ -3,6 +3,7 @@ package article
 import (
 	"gmc-blog-server/config"
 	"gmc-blog-server/model"
+	"gmc-blog-server/response"
 	article "gmc-blog-server/view/Article"
 	photos "gmc-blog-server/view/Photos"
 	"log"
@@ -22,11 +23,7 @@ func Query(c *gin.Context) error {
 	}
 	articleSIs := article.GetArticleInfos(a, userid)
 
-	c.JSON(http.StatusOK, gin.H{
-		"code":    http.StatusOK,
-		"message": "查询 article 成功",
-		"data":    articleSIs,
-	})
+	response.Success(articleSIs, "查询 article 成功", c)
 	return nil
 }
 
@@ -47,11 +44,8 @@ func ArticlePost(c *gin.Context) error {
 
 		log.Println("update successful")
 		log.Println(a)
-		c.JSON(http.StatusOK, gin.H{
-			"message": "接受成功",
-			"code":    0,
-			"data":    a,
-		})
+
+		response.Success(a, "接受成功", c)
 
 		return nil
 	} else {
@@ -62,11 +56,12 @@ func ArticlePost(c *gin.Context) error {
 
 		log.Println("insert article successful")
 		log.Println(a)
-		c.JSON(http.StatusOK, gin.H{
-			"message": "接受成功",
-			"code":    0,
-			"data":    a,
-		})
+		// c.JSON(http.StatusOK, gin.H{
+		// 	"message": "接受成功",
+		// 	"code":    0,
+		// 	"data":    a,
+		// })
+		response.Success(a, "接受成功", c)
 		return nil
 	}
 }
@@ -94,10 +89,7 @@ func ArticleQuery(c *gin.Context) error {
 		return err
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"code": http.StatusOK,
-		"data": article,
-	})
+	response.Success(article, "", c)
 
 	return nil
 }
@@ -112,10 +104,11 @@ func ArticleQueryByType(c *gin.Context) error {
 		return err
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"code": http.StatusOK,
-		"data": article,
-	})
+	// c.JSON(http.StatusOK, gin.H{
+	// 	"code": http.StatusOK,
+	// 	"data": article,
+	// })
+	response.Success(article, "", c)
 
 	return nil
 }
