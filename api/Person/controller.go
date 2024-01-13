@@ -93,8 +93,12 @@ func GerUserBriefInfo(c *gin.Context) error {
 }
 
 func GetInfo(c *gin.Context) error {
-	id := c.GetInt("userId")
-	u, err := user.GetUserAllInfo(strconv.Itoa(id))
+	id := c.Param("userid")
+	i, err := strconv.Atoi(id)
+	if err != nil {
+		return err
+	}
+	u, err := user.GetUserAllInfo(strconv.Itoa(i))
 	if err == nil {
 		response.Success(u, "查询用户信息成功", c)
 	}
