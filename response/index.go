@@ -23,11 +23,11 @@ func Get(code int, data interface{}, msg string, error bool, c *gin.Context) {
 }
 
 func Success(data interface{}, msg string, c *gin.Context) {
-	Get(http.StatusOK, data, msg, true, c)
+	Get(http.StatusOK, data, msg, false, c)
 }
 
 func ServerError(data interface{}, msg string, c *gin.Context) {
-	Get(http.StatusInternalServerError, data, msg, false, c)
+	Get(http.StatusInternalServerError, data, msg, true, c)
 }
 
 func Fail(code int, data interface{}, msg string, c *gin.Context) {

@@ -64,7 +64,7 @@ func JwtChecker(c *gin.Context) bool {
 	}
 	tokenStruck, ok := CheckToken(tokenStr)
 	if !ok {
-		c.JSON(http.StatusOK, gin.H{"code": 0, "msg": "token不正确"})
+		c.JSON(http.StatusForbidden, gin.H{"code": http.StatusForbidden, "msg": "token不正确"})
 		return false
 	}
 	//token超时

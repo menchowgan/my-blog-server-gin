@@ -74,7 +74,7 @@ func UserPhotosUpload(c *gin.Context) error {
 		return err
 	}
 
-	response.Success(nil, "图片上传成功", c)
+	response.Success(filename, "图片上传成功", c)
 
 	return nil
 }
