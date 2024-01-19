@@ -11,6 +11,7 @@ import (
 	"mime/multipart"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -53,6 +54,12 @@ func UserPhotosDelete(c *gin.Context) error {
 		return err
 	}
 
+	i := c.GetInt("userId")
+	if i == 0 {
+		response.Fail(http.StatusForbidden, nil, "重新登录", c)
+		return nil
+	}
+	photos.GetByUserId(strconv.Itoa(i))
 	response.Success(nil, "删除成功", c)
 
 	return nil
@@ -72,7 +79,7 @@ func UserPhotosUpload(c *gin.Context) error {
 	if err != nil {
 		return err
 	}
-
+	photos.GetByUserId(userid)
 	response.Success(filename, "图片上传成功", c)
 
 	return nil
