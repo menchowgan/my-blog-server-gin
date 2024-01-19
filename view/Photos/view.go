@@ -53,19 +53,7 @@ func PhotosQueryByUserId(userId string) (model.Photos, error) {
 	s, err := r.RedisDb.Get(rKey).Result()
 	var photos model.Photos
 	if err != nil || err == redis.Nil {
-		dr := db.DB.GetDbR()
-		err := dr.Where("userId = ?", userId).First(&photos).Error
-		if err != nil {
-			if errors.Is(err, gorm.ErrRecordNotFound) {
-				log.Println("未找到数据")
-			} else {
-				return model.Photos{}, err
-			}
-		}
-		log.Println("photos urls: ", userId, photos.ImgUrls)
-		if ps, err := json.Marshal(&photos); err == nil {
-			r.RedisDb.Set(rKey, ps, 96*time.Hour).Result()
-		}
+		return GetByUserId((userId))
 	} else {
 		if s != "" {
 			log.Println("cached photos", s)
@@ -76,6 +64,25 @@ func PhotosQueryByUserId(userId string) (model.Photos, error) {
 		}
 	}
 
+	return photos, nil
+}
+
+func GetByUserId(userId string) (model.Photos, error) {
+	rKey := r.GetKey("photo", userId)
+	var photos model.Photos
+	dr := db.DB.GetDbR()
+	err := dr.Where("userId = ?", userId).First(&photos).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			log.Println("未找到数据")
+		} else {
+			return model.Photos{}, err
+		}
+	}
+	log.Println("photos urls: ", userId, photos.ImgUrls)
+	if ps, err := json.Marshal(&photos); err == nil {
+		r.RedisDb.Set(rKey, ps, 96*time.Hour).Result()
+	}
 	return photos, nil
 }
 
