@@ -42,7 +42,7 @@ func ArticleSimplaeInfosQueryByUserId(userId string) ([]model.Articles, error) {
 	log.Println("user id: ", userId)
 
 	var articleSI []model.Articles
-	err := dr.Select("id, userId, imgUrl, title, brief, created_at").Where("userId = ?", userId).Order("created_at desc").Limit(5).Find(&articleSI).Error
+	err := dr.Select("id, userId, imgUrl, title, brief, created_at").Where("userId = ?", userId).Order("created_at desc").Find(&articleSI).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			log.Println("未找到数据")
