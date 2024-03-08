@@ -10,9 +10,9 @@ const (
 	REDIS      = "redis"
 	REDIS_ADDR = "127.0.0.1:6379"
 
-	PHOTO_QUERY_PATH = "http://8.136.84.136:81/"
-	MUSCI_QUERY_PATH = "http://8.136.84.136:81/"
-	VIDEO_QUERY_PATH = "http://8.136.84.136:81/"
+	PHOTO_QUERY_PATH = "http://47.116.163.91:81/"
+	MUSCI_QUERY_PATH = "http://47.116.163.91:81/"
+	VIDEO_QUERY_PATH = "http://47.116.163.91:81/"
 	PHOTO_PATH       = "/usr/local/share/images/"
 	MUSCI_PATH       = "/usr/local/share/music/"
 	VIDEO_PATH       = "/usr/local/share/video/"
