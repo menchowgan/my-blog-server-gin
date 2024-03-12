@@ -8,4 +8,5 @@ type MusicInfo struct {
 	Evalution string `json:"evalution"`
 	AudioUrl  string `json:"audioUrl"`
 	Avatar    string `json:"avatar"`
+	Lyric     string `json:"lyric"`
 }
