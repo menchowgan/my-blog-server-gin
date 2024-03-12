@@ -260,6 +260,7 @@ func searchMusic(id string, userInfo *user.PsersonSimpleIinfo, wg *sync.WaitGrou
 				AudioUrl:  config.MUSCI_QUERY_PATH + id + "/" + m.AudioUrl,
 				Evalution: m.Evalution,
 				Avatar:    config.MUSCI_QUERY_PATH + id + "/" + m.Avatar,
+				Lyric:     m.Lyric,
 			})
 		}
 	}
