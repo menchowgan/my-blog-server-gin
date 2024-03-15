@@ -46,7 +46,7 @@ func Update(plan model.Plan) error {
 func Search(userId int) (PlanModel, error) {
 	rKey := r.GetKey("plan", strconv.Itoa(userId))
 	s, err := r.RedisDb.Get(rKey).Result()
-	if err != nil || err == redis.Nil {
+	if err == redis.Nil || err != nil {
 		return searchAndUpdate(strconv.Itoa(userId))
 	} else {
 		planModel := PlanModel{}
