@@ -2,6 +2,7 @@ package errhandler
 
 import (
 	"fmt"
+	"gmc-blog-server/response"
 	"net/http"
 	"os"
 
@@ -14,21 +15,15 @@ func Handle(err error, c *gin.Context) {
 	switch {
 	case os.IsNotExist(err):
 		code = http.StatusNotFound
-		c.JSON(code, gin.H{
-			"code":    code,
-			"message": err.Error(),
-		})
+		response.Fail(code, nil, err.Error(), c)
 	case os.IsPermission(err):
 		code = http.StatusForbidden
-		c.JSON(code, gin.H{
-			"code":    code,
-			"message": err.Error(),
-		})
+		response.Fail(code, nil, err.Error(), c)
+	case os.IsTimeout(err):
+		code = http.StatusRequestTimeout
+		response.Fail(code, nil, err.Error(), c)
 	default:
 		code = http.StatusInternalServerError
-		c.JSON(code, gin.H{
-			"code":    code,
-			"message": err.Error(),
-		})
+		response.Fail(code, nil, err.Error(), c)
 	}
 }

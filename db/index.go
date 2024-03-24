@@ -3,10 +3,12 @@ package db
 import (
 	"fmt"
 	"gmc-blog-server/config"
+	"gmc-blog-server/model"
 	"time"
 
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 	"gorm.io/gorm/schema"
 )
 
@@ -96,7 +98,7 @@ func dbConnect(user, pass, addr, dbName string) (*gorm.DB, error) {
 		NamingStrategy: schema.NamingStrategy{
 			SingularTable: true,
 		},
-		//Logger: logger.Default.LogMode(logger.Info), // 日志配置
+		Logger: logger.Default.LogMode(logger.Info),
 	})
 
 	if err != nil {
@@ -120,4 +122,33 @@ func dbConnect(user, pass, addr, dbName string) (*gorm.DB, error) {
 	sqlDB.SetConnMaxLifetime(time.Minute * time.Duration(10))
 
 	return db, nil
+}
+
+func InitTables() {
+	dw := DB.GetDbW()
+
+	dw.Transaction(func(tx *gorm.DB) error {
+		var err error
+		var models [6]interface{}
+		models[0] = &model.User{}
+		models[1] = &model.Articles{}
+		models[2] = &model.Photos{}
+		models[3] = &model.Music{}
+		models[4] = &model.Video{}
+		models[5] = &model.Plan{}
+
+		for _, m := range models {
+			has := tx.Migrator().HasTable(m)
+
+			if !has {
+				err = tx.AutoMigrate(m)
+				if err != nil {
+					return err
+				}
+			}
+		}
+
+		return nil
+	})
+
 }
