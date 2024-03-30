@@ -36,7 +36,7 @@ func main() {
 	r.Use(middlewares.TestMiddleware())
 
 	router.Get(r, "/hello", func(ctx *gin.Context) error {
-		response.Success(nil, "Simple life", ctx)
+		response.Success(nil, "Welcome to simple life", ctx)
 		return nil
 	})
 
