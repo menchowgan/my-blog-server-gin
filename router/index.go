@@ -7,6 +7,7 @@ import (
 	photos "gmc-blog-server/api/Photos"
 	plan "gmc-blog-server/api/Plan"
 	video "gmc-blog-server/api/Video"
+	weather "gmc-blog-server/api/Weather"
 	jwt "gmc-blog-server/token"
 	"net/http"
 )
@@ -153,6 +154,13 @@ func CreateRouter() GroupStruct {
 					Url:     "/search/:userId",
 					Method:  http.MethodGet,
 					Handler: plan.Search,
+				},
+			},
+			"weather": {
+				{
+					Url:     "/query", // 根据城市查询天气
+					Method:  http.MethodGet,
+					Handler: weather.GetWeather,
 				},
 			},
 		},
