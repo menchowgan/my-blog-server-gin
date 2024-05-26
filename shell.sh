@@ -13,7 +13,7 @@ build () {
 upload () {
   for host in $HOST_LIST;do
     ssh root@$host "cd ${APP_PATH};\
-            killall -0 ${APP} &>/dev/null && killall ${APP} \
+            killall -0 ${APP} &>/dev/null && killall ${APP}; \
             rm -rf ${APP};
           "
     
