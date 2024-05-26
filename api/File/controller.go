@@ -19,7 +19,7 @@ type ChunkUpload struct {
 	Total    int
 	BasePath string // chunks存储路径
 	DstPath  string // 文件存储路径
-	ctx      *gin.Context
+	Ctx      *gin.Context
 }
 
 func FileUpload(c *gin.Context, file *multipart.FileHeader, path string) (string, error) {
@@ -38,13 +38,39 @@ func FileUpload(c *gin.Context, file *multipart.FileHeader, path string) (string
 	log.Printf("file name : %s", file.Filename)
 
 	err := c.SaveUploadedFile(file, dst)
-	if err != nil && file.Filename != "" {
+	if err == nil && file.Filename != "" {
 		return file.Filename, err
 	}
 	return "", err
 }
 
 func Check(c *gin.Context) error {
+	return DoUpload(
+		c,
+		"/usr/local/share/chunks",
+		"/usr/local/share/chunks",
+		func(cu *ChunkUpload) {
+			if cu.Total == 1 {
+				c.JSON(http.StatusOK, gin.H{
+					"code":    http.StatusOK,
+					"success": true,
+					"data":    "coverVideo/" + cu.FileName,
+				})
+			}
+		})
+}
+
+func MergeChunks(c *gin.Context) error {
+	return DoMerge(
+		c,
+		"/usr/local/share/chunks",
+		"/usr/local/share/chunks",
+		func(cu *ChunkUpload) {
+			response.Success(nil, "File merged successfully", c)
+		})
+}
+
+func DoUpload(c *gin.Context, basePath, dstPath string, handler func(*ChunkUpload)) error {
 	fileName := c.PostForm("fileName")
 	index := c.PostForm("index")
 	totalChunks := c.PostForm("totalChunks")
@@ -58,15 +84,22 @@ func Check(c *gin.Context) error {
 		FileName: fileName,
 		Index:    index,
 		Total:    total,
-		BasePath: "/usr/local/share/chunks",
-		DstPath:  "/usr/local/share/chunks",
-		ctx:      c,
+		BasePath: basePath,
+		DstPath:  dstPath,
+		Ctx:      c,
 	}
 
-	return chunk.UploadChunk()
+	err = chunk.UploadChunk()
+	if err != nil {
+		return err
+	}
+
+	handler(&chunk)
+
+	return err
 }
 
-func MergeChunks(c *gin.Context) error {
+func DoMerge(c *gin.Context, basePath, dstPath string, handler func(*ChunkUpload)) error {
 	filename := c.PostForm("fileName")
 	if filename == "" {
 		response.Fail(http.StatusBadRequest, nil, "Invalid filename", c)
@@ -83,15 +116,25 @@ func MergeChunks(c *gin.Context) error {
 	chunk := ChunkUpload{
 		FileName: filename,
 		Total:    total,
-		BasePath: "/usr/local/share/chunks",
-		DstPath:  "/usr/local/share/chunks",
-		ctx:      c,
+		BasePath: basePath,
+		DstPath:  dstPath,
+		Ctx:      c,
 	}
 
-	return chunk.Merge()
+	err = chunk.Merge()
+	if err != nil {
+		return err
+	}
+
+	handler(&chunk)
+
+	return nil
 }
 
 func (cu *ChunkUpload) UploadChunk() error {
+	DirNotExistMkdir(cu.BasePath)
+	DirNotExistMkdir(cu.DstPath)
+
 	dst := filepath.Join(cu.BasePath, cu.FileName+"-"+cu.Index)
 
 	startFrom := 0
@@ -111,25 +154,29 @@ func (cu *ChunkUpload) UploadChunk() error {
 	log.Println("dst: ", dst)
 	// 检查文件是否存在
 	if IsExist(dst) {
-		cu.ctx.JSON(http.StatusOK, gin.H{
-			"data":      "exist",
-			"msg":       dst + " exists",
-			"startFrom": startFrom,
-		})
+		if cu.Total > 1 {
+			cu.Ctx.JSON(http.StatusOK, gin.H{
+				"data":      "exist",
+				"msg":       dst + " exists",
+				"startFrom": startFrom,
+			})
+		}
 		return nil
 	}
 
-	file, _ := cu.ctx.FormFile("file")
+	file, _ := cu.Ctx.FormFile("file")
 	log.Println("file size", file.Size)
-	err = cu.ctx.SaveUploadedFile(file, dst)
+	err = cu.Ctx.SaveUploadedFile(file, dst)
 	if err != nil && file.Filename != "" {
 		return err
 	}
-	cu.ctx.JSON(http.StatusOK, gin.H{
-		"data":      "success",
-		"msg":       dst,
-		"startFrom": startFrom + 1,
-	})
+	if cu.Total > 1 {
+		cu.Ctx.JSON(http.StatusOK, gin.H{
+			"data":      "success",
+			"msg":       dst,
+			"startFrom": startFrom + 1,
+		})
+	}
 	return nil
 }
 
@@ -138,6 +185,13 @@ func IsExist(path string) bool {
 		return false
 	}
 	return true
+}
+
+func DirNotExistMkdir(path string) {
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		os.MkdirAll(path, 0777)
+		os.Chmod(path, 0777)
+	}
 }
 
 func (cu *ChunkUpload) Merge() error {
@@ -172,7 +226,6 @@ func (cu *ChunkUpload) Merge() error {
 		}
 	}
 
-	response.Success(nil, "File merged successfully", cu.ctx)
 	return nil
 }
 

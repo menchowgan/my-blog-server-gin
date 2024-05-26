@@ -4,6 +4,7 @@ import (
 	fileapi "gmc-blog-server/api/File"
 	"gmc-blog-server/config"
 	"gmc-blog-server/model"
+	"gmc-blog-server/response"
 	photos "gmc-blog-server/view/Photos"
 	video "gmc-blog-server/view/Video"
 	"log"
@@ -48,6 +49,52 @@ func VideoUpload(c *gin.Context) error {
 	return nil
 }
 
+func VideoUploadChunk(c *gin.Context) error {
+	userid := c.Param("userid")
+	log.Println("photo upload user id: ", userid)
+	if userid == "" {
+		response.Fail(http.StatusBadRequest, nil, "Invalid userid", c)
+		return nil
+	}
+
+	return fileapi.DoUpload(
+		c,
+		config.VIDEO_PATH+userid+"/chunks",
+		config.VIDEO_PATH+userid,
+		func(cu *fileapi.ChunkUpload) {
+			if cu.Total == 1 {
+				c.JSON(http.StatusOK, gin.H{
+					"code":    http.StatusOK,
+					"data":    cu.FileName,
+					"message": "音频上传成功：" + cu.FileName,
+				})
+			}
+		},
+	)
+}
+
+func VideoUploadMerge(c *gin.Context) error {
+	userid := c.Param("userid")
+	log.Println("photo upload user id: ", userid)
+	if userid == "" {
+		response.Fail(http.StatusBadRequest, nil, "Invalid userid", c)
+		return nil
+	}
+
+	return fileapi.DoMerge(
+		c,
+		config.VIDEO_PATH+userid+"/chunks",
+		config.VIDEO_PATH+userid,
+		func(cu *fileapi.ChunkUpload) {
+			c.JSON(http.StatusOK, gin.H{
+				"code":    http.StatusOK,
+				"data":    cu.FileName,
+				"message": "音频上传成功：" + cu.FileName,
+			})
+		},
+	)
+}
+
 func videoUpload(c *gin.Context, file *multipart.FileHeader) (string, error) {
 	return fileapi.FileUpload(c, file, config.VIDEO_PATH)
 }
@@ -55,24 +102,70 @@ func videoUpload(c *gin.Context, file *multipart.FileHeader) (string, error) {
 func VideoCoverUpload(c *gin.Context) error {
 	file, err := c.FormFile("file")
 	log.Println("photo file: ", file.Filename)
-	if err == nil {
-		filename, err := coverUpload(c, file)
-		if err == nil && filename != "" {
-			c.JSON(http.StatusOK, gin.H{
-				"code":    http.StatusOK,
-				"success": true,
-				"data":    "coverVideo/" + file.Filename,
-			})
-			return nil
-		}
-		c.JSON(photos.AvatarUploadFailed, gin.H{
-			"code":    photos.AvatarUploadFailed,
-			"data":    nil,
-			"message": photos.StatusText(photos.AvatarUploadFailed),
+	if err != nil {
+		return err
+	}
+	filename, err := coverUpload(c, file)
+	if err == nil && filename != "" {
+		c.JSON(http.StatusOK, gin.H{
+			"code":    http.StatusOK,
+			"success": true,
+			"data":    "coverVideo/" + file.Filename,
 		})
 		return nil
 	}
-	return err
+	c.JSON(photos.AvatarUploadFailed, gin.H{
+		"code":    photos.AvatarUploadFailed,
+		"data":    nil,
+		"message": photos.StatusText(photos.AvatarUploadFailed),
+	})
+	return nil
+}
+
+func VideoCoverUploadChunk(c *gin.Context) error {
+	userid := c.Param("userid")
+	log.Println("photo upload user id: ", userid)
+	if userid == "" {
+		response.Fail(http.StatusBadRequest, nil, "Invalid userid", c)
+		return nil
+	}
+
+	return fileapi.DoUpload(
+		c,
+		config.VIDEO_PATH+userid+"/coverVideo/chunks",
+		config.VIDEO_PATH+userid+"/coverVideo",
+		func(cu *fileapi.ChunkUpload) {
+			if cu.Total == 1 {
+				c.JSON(http.StatusOK, gin.H{
+					"code":    http.StatusOK,
+					"success": true,
+					"data":    "coverVideo/" + cu.FileName,
+				})
+			}
+		},
+	)
+}
+
+func VideoCoverUploadMerge(c *gin.Context) error {
+	userid := c.Param("userid")
+	log.Println("photo upload user id: ", userid)
+	if userid == "" {
+		response.Fail(http.StatusBadRequest, nil, "Invalid userid", c)
+		return nil
+	}
+
+	return fileapi.DoMerge(
+		c,
+		config.VIDEO_PATH+userid+"/coverVideo/chunks",
+		config.VIDEO_PATH+userid+"/coverVideo",
+		func(cu *fileapi.ChunkUpload) {
+			c.JSON(http.StatusOK, gin.H{
+				"code":    http.StatusOK,
+				"success": true,
+				"data":    "coverVideo/" + cu.FileName,
+			})
+		},
+	)
 }
 
 func UserVideoUpload(c *gin.Context) error {
