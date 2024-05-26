@@ -2,6 +2,7 @@ package router
 
 import (
 	article "gmc-blog-server/api/Article"
+	fileapi "gmc-blog-server/api/File"
 	music "gmc-blog-server/api/Music"
 	person "gmc-blog-server/api/Person"
 	photos "gmc-blog-server/api/Photos"
@@ -161,6 +162,18 @@ func CreateRouter() GroupStruct {
 					Url:     "/query", // 根据城市查询天气
 					Method:  http.MethodGet,
 					Handler: weather.GetWeather,
+				},
+			},
+			"/file": {
+				{
+					Url:     "/upload",
+					Method:  http.MethodPost,
+					Handler: fileapi.Check,
+				},
+				{
+					Url:     "/merge",
+					Method:  http.MethodPost,
+					Handler: fileapi.MergeChunks,
 				},
 			},
 		},

@@ -52,7 +52,7 @@ func PhotosQueryByUserId(userId string) (model.Photos, error) {
 	rKey := r.GetKey("photo", userId)
 	s, err := r.RedisDb.Get(rKey).Result()
 	var photos model.Photos
-	if err != nil || err == redis.Nil {
+	if err == redis.Nil || err != nil {
 		return GetByUserId((userId))
 	} else {
 		if s != "" {
