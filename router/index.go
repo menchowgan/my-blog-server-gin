@@ -130,9 +130,29 @@ func CreateRouter() GroupStruct {
 					Handler:    video.VideoUpload,
 					Middleware: jwt.JwtMiddleware(),
 				}, {
+					Url:        "/upload/chunk/:userid", // 用户上传视频的封面
+					Method:     http.MethodPost,
+					Handler:    video.VideoUploadChunk,
+					Middleware: jwt.JwtMiddleware(),
+				}, {
+					Url:        "/upload/chunk/merge/:userid", // 用户上传视频的封面
+					Method:     http.MethodPost,
+					Handler:    video.VideoUploadMerge,
+					Middleware: jwt.JwtMiddleware(),
+				}, {
 					Url:        "/cover/upload/:userid", // 用户上传视频的封面
 					Method:     http.MethodPost,
 					Handler:    video.VideoCoverUpload,
+					Middleware: jwt.JwtMiddleware(),
+				}, {
+					Url:        "/cover/upload/chunk/:userid", // 用户上传视频的封面
+					Method:     http.MethodPost,
+					Handler:    video.VideoCoverUploadChunk,
+					Middleware: jwt.JwtMiddleware(),
+				}, {
+					Url:        "/cover/upload/chunk/merge/:userid", // 用户上传视频的封面
+					Method:     http.MethodPost,
+					Handler:    video.VideoCoverUploadMerge,
 					Middleware: jwt.JwtMiddleware(),
 				}, {
 					Url:        "/user/upload",
