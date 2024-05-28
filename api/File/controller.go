@@ -20,6 +20,7 @@ type ChunkUpload struct {
 	BasePath string // chunks存储路径
 	DstPath  string // 文件存储路径
 	Ctx      *gin.Context
+	Code     int
 }
 
 func FileUpload(c *gin.Context, file *multipart.FileHeader, path string) (string, error) {
@@ -135,6 +136,12 @@ func (cu *ChunkUpload) UploadChunk() error {
 	DirNotExistMkdir(cu.BasePath)
 	DirNotExistMkdir(cu.DstPath)
 
+	exist := IsExist(filepath.Join(cu.DstPath, cu.FileName))
+	if exist {
+		cu.Code = response.FileExist
+		return nil
+	}
+
 	dst := filepath.Join(cu.BasePath, cu.FileName+"-"+cu.Index)
 
 	startFrom := 0
@@ -209,7 +216,7 @@ func (cu *ChunkUpload) Merge() error {
 	for i := 0; i < cu.Total; i++ {
 		baseFilepath := filepath.Join(cu.BasePath, cu.FileName+"-"+strconv.Itoa(i))
 		// 读取分片文件
-		chunkFile, err := os.Open(baseFilepath)
+		chunkFile, err := os.OpenFile(baseFilepath, os.O_RDONLY, os.ModePerm)
 		if err != nil {
 			return err
 		}
