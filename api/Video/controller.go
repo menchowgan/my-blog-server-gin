@@ -62,6 +62,14 @@ func VideoUploadChunk(c *gin.Context) error {
 		config.VIDEO_PATH+userid+"/chunks",
 		config.VIDEO_PATH+userid,
 		func(cu *fileapi.ChunkUpload) {
+			if cu.Code == response.FileExist {
+				cu.Ctx.JSON(http.StatusOK, gin.H{
+					"data": cu.FileName,
+					"msg":  cu.FileName + response.StatusText(response.FileExist),
+					"code": response.FileExist,
+				})
+				return
+			}
 			if cu.Total == 1 {
 				c.JSON(http.StatusOK, gin.H{
 					"code":    http.StatusOK,
