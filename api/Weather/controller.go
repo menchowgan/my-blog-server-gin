@@ -43,6 +43,7 @@ func GetWeather(c *gin.Context) error {
 		return err
 	}
 
+	c.Header("Connection", "keep-alive")
 	response.Success(string(body), "天气查询成功", c)
 	return nil
 }
