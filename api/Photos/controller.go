@@ -107,6 +107,11 @@ func UserPhotosUploadChunk(c *gin.Context) error {
 				return
 			}
 			if cu.Total == 1 {
+				err := photos.PhotoUpdate(cu.FileName, userid)
+				if err != nil {
+					response.Fail(http.StatusInternalServerError, nil, "图片上传失败", c)
+					return
+				}
 				c.JSON(http.StatusOK, gin.H{
 					"code":    http.StatusOK,
 					"data":    cu.FileName,

@@ -9,6 +9,7 @@ import (
 	photos "gmc-blog-server/view/Photos"
 	"log"
 	"mime/multipart"
+	"net/http"
 	"os"
 	"path/filepath"
 
@@ -71,6 +72,42 @@ func UserMusicUpload(c *gin.Context) error {
 	}
 
 	return err
+}
+
+func UserMusicUploadChunk(c *gin.Context) error {
+	userid := c.Param("userid")
+	log.Println("photo upload user id: ", userid)
+	if userid == "" {
+		response.Fail(http.StatusBadRequest, nil, "Invalid userid", c)
+		return nil
+	}
+
+	return fileapi.DoUpload(
+		c,
+		config.MUSCI_PATH+userid+"/chunk",
+		config.MUSCI_PATH+userid,
+		func(cu *fileapi.ChunkUpload) {
+			if cu.Code == response.FileExist {
+				cu.Ctx.JSON(http.StatusOK, gin.H{
+					"data": cu.FileName,
+					"msg":  cu.FileName + response.StatusText(response.FileExist),
+					"code": response.FileExist,
+				})
+				return
+			}
+			if cu.Total == 1 {
+				c.JSON(http.StatusOK, gin.H{
+					"code":    http.StatusOK,
+					"data":    cu.FileName,
+					"message": "音频上传成功：" + cu.FileName,
+				})
+			}
+		},
+	)
+}
+
+func UserMusicUploadChunkMerge(c *gin.Context) error {
+	return nil
 }
 
 func MusicUpload(c *gin.Context) error {
