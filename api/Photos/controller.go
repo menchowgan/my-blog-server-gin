@@ -85,6 +85,62 @@ func UserPhotosUpload(c *gin.Context) error {
 	return nil
 }
 
+func UserPhotosUploadChunk(c *gin.Context) error {
+	userid := c.Param("userid")
+	log.Println("photo upload user id: ", userid)
+	if userid == "" {
+		response.Fail(http.StatusBadRequest, nil, "Invalid userid", c)
+		return nil
+	}
+
+	return fileapi.DoUpload(
+		c,
+		config.PHOTO_PATH+userid+"/chunk",
+		config.PHOTO_PATH+userid,
+		func(cu *fileapi.ChunkUpload) {
+			if cu.Code == response.FileExist {
+				cu.Ctx.JSON(http.StatusOK, gin.H{
+					"data": cu.FileName,
+					"msg":  cu.FileName + response.StatusText(response.FileExist),
+					"code": response.FileExist,
+				})
+				return
+			}
+			if cu.Total == 1 {
+				c.JSON(http.StatusOK, gin.H{
+					"code":    http.StatusOK,
+					"data":    cu.FileName,
+					"message": "音频上传成功：" + cu.FileName,
+				})
+			}
+		},
+	)
+}
+
+func UserPhotosUploadChunkMerge(c *gin.Context) error {
+	userid := c.Param("userid")
+	log.Println("photo upload user id: ", userid)
+	if userid == "" {
+		response.Fail(http.StatusBadRequest, nil, "Invalid userid", c)
+		return nil
+	}
+
+	return fileapi.DoMerge(
+		c,
+		config.PHOTO_PATH+userid+"/chunk",
+		config.PHOTO_PATH+userid,
+		func(cu *fileapi.ChunkUpload) {
+			err := photos.PhotoUpdate(cu.FileName, userid)
+			if err != nil {
+				response.Fail(http.StatusInternalServerError, nil, "图片上传失败", c)
+				return
+			}
+			photos.GetByUserId(userid)
+			response.Success(cu.FileName, "图片上传成功", c)
+		},
+	)
+}
+
 func PhotoUpload(c *gin.Context) error {
 	file, err := c.FormFile("file")
 	log.Println("photo file: ", file.Filename)

@@ -60,6 +60,16 @@ func CreateRouter() GroupStruct {
 					Handler:    photos.UserPhotosUpload,
 					Middleware: jwt.JwtMiddleware(),
 				}, {
+					Url:        "/user/photos/chunk/upload/:userid",
+					Method:     http.MethodPost,
+					Handler:    photos.UserPhotosUploadChunk,
+					Middleware: jwt.JwtMiddleware(),
+				}, {
+					Url:        "/user/photos/chunk/merge/:userid",
+					Method:     http.MethodPost,
+					Handler:    photos.UserPhotosUploadChunkMerge,
+					Middleware: jwt.JwtMiddleware(),
+				}, {
 					Url:        "/user/photos/delete", // 先对数据库进行更新再删除文件
 					Method:     http.MethodDelete,
 					Handler:    photos.UserPhotosDelete,
