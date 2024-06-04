@@ -107,7 +107,21 @@ func UserMusicUploadChunk(c *gin.Context) error {
 }
 
 func UserMusicUploadChunkMerge(c *gin.Context) error {
-	return nil
+	userid := c.Param("userid")
+	log.Println("photo upload user id: ", userid)
+	if userid == "" {
+		response.Fail(http.StatusBadRequest, nil, "Invalid userid", c)
+		return nil
+	}
+
+	return fileapi.DoMerge(
+		c,
+		config.MUSCI_PATH+userid+"/chunk",
+		config.MUSCI_PATH+userid,
+		func(cu *fileapi.ChunkUpload) {
+			response.Success(cu.FileName, "音频上传成功："+cu.FileName, c)
+		},
+	)
 }
 
 func MusicUpload(c *gin.Context) error {

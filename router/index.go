@@ -93,6 +93,16 @@ func CreateRouter() GroupStruct {
 					Handler:    music.UserMusicUpload,
 					Middleware: jwt.JwtMiddleware(),
 				}, {
+					Url:        "/chunk/upload/:userid",
+					Method:     http.MethodPost,
+					Handler:    music.UserMusicUploadChunk,
+					Middleware: jwt.JwtMiddleware(),
+				}, {
+					Url:        "/chunk/merge/:userid",
+					Method:     http.MethodPost,
+					Handler:    music.UserMusicUploadChunkMerge,
+					Middleware: jwt.JwtMiddleware(),
+				}, {
 					Url:     "/query/:id",
 					Method:  http.MethodPost,
 					Handler: music.Query,
