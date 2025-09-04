@@ -30,7 +30,9 @@ func main() {
 	}()
 
 	db.InitTables()
-	redis.Init()
+	if err := redis.Init(); err != nil {
+		panic(err)
+	}
 
 	r.Use(middlewares.LogValidator())
 	r.Use(middlewares.TestMiddleware())

@@ -13,7 +13,7 @@ var (
 
 func Init() error {
 	RedisDb = redis.NewClient(&redis.Options{
-		Addr:     config.REDIS_ADDR,
+		Addr:     config.AppConfig.RedisAddr,
 		Password: "",
 		DB:       0,
 	})

@@ -37,8 +37,8 @@ func SearchByUserId(userid string) ([]MusicInfo, error) {
 			Title:     audio.Title,
 			Artist:    audio.Artist,
 			Evalution: audio.Evalution,
-			Avatar:    config.PHOTO_QUERY_PATH + userid + "/" + audio.Avatar,
-			AudioUrl:  config.MUSCI_QUERY_PATH + userid + "/" + audio.AudioUrl,
+			Avatar:    config.AppConfig.PhotoQueryPath + userid + "/" + audio.Avatar,
+			AudioUrl:  config.AppConfig.MusicQueryPath + userid + "/" + audio.AudioUrl,
 		})
 	}
 	return audioArray, nil

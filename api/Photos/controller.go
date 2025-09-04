@@ -95,8 +95,8 @@ func UserPhotosUploadChunk(c *gin.Context) error {
 
 	return fileapi.DoUpload(
 		c,
-		config.PHOTO_PATH+userid+"/chunk",
-		config.PHOTO_PATH+userid,
+		config.AppConfig.PhotoPath+userid+"/chunk",
+		config.AppConfig.PhotoPath+userid,
 		func(cu *fileapi.ChunkUpload) {
 			if cu.Code == response.FileExist {
 				cu.Ctx.JSON(http.StatusOK, gin.H{
@@ -133,8 +133,8 @@ func UserPhotosUploadChunkMerge(c *gin.Context) error {
 
 	return fileapi.DoMerge(
 		c,
-		config.PHOTO_PATH+userid+"/chunk",
-		config.PHOTO_PATH+userid,
+		config.AppConfig.PhotoPath+userid+"/chunk",
+		config.AppConfig.PhotoPath+userid,
 		func(cu *fileapi.ChunkUpload) {
 			err := photos.PhotoUpdate(cu.FileName, userid)
 			if err != nil {
@@ -166,11 +166,11 @@ func PhotoUpload(c *gin.Context) error {
 }
 
 func photoUpload(c *gin.Context, file *multipart.FileHeader) (string, error) {
-	return fileapi.FileUpload(c, file, config.PHOTO_PATH)
+	return fileapi.FileUpload(c, file, config.AppConfig.PhotoPath)
 }
 
 func deletePicture(uri string) error {
-	filePath := config.PHOTO_PATH + uri
+	filePath := config.AppConfig.PhotoPath + uri
 	log.Println("file path: ", filePath)
 	if _, err := os.Stat(filePath); err != nil {
 		return err

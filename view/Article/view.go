@@ -71,7 +71,7 @@ func SearchArticleInfo(articleId string) (ArticleInfoModel, error) {
 		Type:      a.Type,
 		Title:     a.Title,
 		Brief:     a.Brief,
-		ImgUrl:    config.PHOTO_QUERY_PATH + strconv.Itoa(int(a.UserId)) + "/article/" + a.ImgUrl,
+		ImgUrl:    config.AppConfig.PhotoQueryPath + strconv.Itoa(int(a.UserId)) + "/article/" + a.ImgUrl,
 	}, nil
 }
 
@@ -91,7 +91,7 @@ func SearchArticleInfoByType(userid string, atype string) ([]ArticleSimpleInfoMo
 			as = append(as, ArticleSimpleInfoModel{
 				ID:     int64(a.ID),
 				UserId: a.UserId,
-				ImgUrl: config.PHOTO_QUERY_PATH + strconv.Itoa(int(a.UserId)) + "/article/" + a.ImgUrl,
+				ImgUrl: config.AppConfig.PhotoQueryPath + strconv.Itoa(int(a.UserId)) + "/article/" + a.ImgUrl,
 				Title:  a.Title,
 				Brief:  a.Brief,
 				Date:   a.CreatedAt,
@@ -128,7 +128,7 @@ func GetArticleInfos(a []model.Articles, userid string) []ArticleSimpleInfoModel
 				ID:     int64(a.ID),
 				Title:  a.Title,
 				UserId: a.UserId,
-				ImgUrl: config.PHOTO_QUERY_PATH + userid + "/article/" + a.ImgUrl,
+				ImgUrl: config.AppConfig.PhotoQueryPath + userid + "/article/" + a.ImgUrl,
 				Brief:  a.Brief,
 				Date:   a.CreatedAt,
 			})

@@ -257,9 +257,9 @@ func searchMusic(id string, userInfo *user.PsersonSimpleIinfo, wg *sync.WaitGrou
 				ID:        m.ID,
 				Artist:    m.Artist,
 				Title:     m.Title,
-				AudioUrl:  config.MUSCI_QUERY_PATH + id + "/" + m.AudioUrl,
+				AudioUrl:  config.AppConfig.MusicQueryPath + id + "/" + m.AudioUrl,
 				Evalution: m.Evalution,
-				Avatar:    config.MUSCI_QUERY_PATH + id + "/" + m.Avatar,
+				Avatar:    config.AppConfig.MusicQueryPath + id + "/" + m.Avatar,
 				Lyric:     m.Lyric,
 			})
 		}
@@ -280,7 +280,7 @@ func searchArticle(id string, userInfo *user.PsersonSimpleIinfo, wg *sync.WaitGr
 		Brief:  oneArticle.Brief,
 		Title:  oneArticle.Title,
 		UserId: oneArticle.UserId,
-		ImgUrl: config.PHOTO_QUERY_PATH + id + "/" + "article" + "/" + oneArticle.ImgUrl,
+		ImgUrl: config.AppConfig.PhotoQueryPath + id + "/" + "article" + "/" + oneArticle.ImgUrl,
 		Date:   oneArticle.CreatedAt,
 	}
 
@@ -299,7 +299,7 @@ func searchPhoto(id string, userInfo *user.PsersonSimpleIinfo, wg *sync.WaitGrou
 		for idx, url := range urls {
 			model := photos.PhotoInfo{
 				ID:  uint(idx + 1),
-				Url: config.PHOTO_QUERY_PATH + id + "/" + url,
+				Url: config.AppConfig.PhotoQueryPath + id + "/" + url,
 			}
 			imgUrls = append(imgUrls, model)
 		}
@@ -314,7 +314,7 @@ func searchUser(id string, userInfo *user.PsersonSimpleIinfo, wg *sync.WaitGroup
 	if userI.ID == 0 {
 		return
 	}
-	userInfo.Avatar = config.PHOTO_QUERY_PATH + id + "/" + userI.Avatar
+	userInfo.Avatar = config.AppConfig.PhotoQueryPath + id + "/" + userI.Avatar
 	userInfo.Nickname = userI.Nickname
 	userInfo.ID = userI.ID
 }

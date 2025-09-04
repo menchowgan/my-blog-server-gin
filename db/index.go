@@ -68,12 +68,22 @@ func (d *dbRepo) DbWClose() error {
 
 // New 创建连接
 func New() (Repo, error) {
-	dbr, err := dbConnect(config.USER, config.PASSWORD, config.ADDR, config.DATABASE_NAME)
+	dbr, err := dbConnect(
+		config.AppConfig.DatabaseUser,
+		config.AppConfig.DatabasePass,
+		config.AppConfig.DatabaseAddr,
+		config.AppConfig.DatabaseName,
+	)
 	if err != nil {
 		return nil, err
 	}
 
-	dbw, err := dbConnect(config.USER, config.PASSWORD, config.ADDR, config.DATABASE_NAME)
+	dbw, err := dbConnect(
+		config.AppConfig.DatabaseUser,
+		config.AppConfig.DatabasePass,
+		config.AppConfig.DatabaseAddr,
+		config.AppConfig.DatabaseName,
+	)
 	if err != nil {
 		return nil, err
 	}

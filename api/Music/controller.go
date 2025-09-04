@@ -84,8 +84,8 @@ func UserMusicUploadChunk(c *gin.Context) error {
 
 	return fileapi.DoUpload(
 		c,
-		config.MUSCI_PATH+userid+"/chunk",
-		config.MUSCI_PATH+userid,
+		config.AppConfig.MusicPath+userid+"/chunk",
+		config.AppConfig.MusicPath+userid,
 		func(cu *fileapi.ChunkUpload) {
 			if cu.Code == response.FileExist {
 				cu.Ctx.JSON(http.StatusOK, gin.H{
@@ -116,8 +116,8 @@ func UserMusicUploadChunkMerge(c *gin.Context) error {
 
 	return fileapi.DoMerge(
 		c,
-		config.MUSCI_PATH+userid+"/chunk",
-		config.MUSCI_PATH+userid,
+		config.AppConfig.MusicPath+userid+"/chunk",
+		config.AppConfig.MusicPath+userid,
 		func(cu *fileapi.ChunkUpload) {
 			response.Success(cu.FileName, "音频上传成功："+cu.FileName, c)
 		},
@@ -138,17 +138,16 @@ func MusicUpload(c *gin.Context) error {
 }
 
 func musicUpload(c *gin.Context, file *multipart.FileHeader) (string, error) {
-	return fileapi.FileUpload(c, file, config.MUSCI_PATH)
+	return fileapi.FileUpload(c, file, config.AppConfig.MusicPath)
 }
 
 func coverUpload(c *gin.Context, file *multipart.FileHeader) (string, error) {
 	userid := c.Param("userid")
 	log.Println("photo upload user id: ", userid)
 	folderName := "cover"
-	folderPath := filepath.Join(config.PHOTO_PATH, userid, folderName)
+	folderPath := filepath.Join(config.AppConfig.PhotoPath, userid, folderName)
 	if _, err := os.Stat(folderPath); os.IsNotExist(err) {
-		os.Mkdir(folderPath, 0777)
-		os.Chmod(folderPath, 0777)
+		os.MkdirAll(folderPath, 0755)
 	}
 	log.Println(file.Filename)
 	dst := filepath.Join(folderPath, file.Filename)

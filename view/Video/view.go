@@ -34,8 +34,8 @@ func SearchByUserId(userid string) ([]VideoInfo, error) {
 			Title:     v.Title,
 			Artist:    v.Artist,
 			Evalution: v.Evalution,
-			VideoUrl:  config.VIDEO_QUERY_PATH + userid + "/" + v.VideoUrl,
-			Avatar:    config.PHOTO_QUERY_PATH + userid + "/" + v.Avatar,
+			VideoUrl:  config.AppConfig.VideoQueryPath + userid + "/" + v.VideoUrl,
+			Avatar:    config.AppConfig.PhotoQueryPath + userid + "/" + v.Avatar,
 		})
 	}
 	return videosArray, nil
@@ -55,7 +55,7 @@ func SearchSimpleLifeByUserId(id string) (VideoInfo, error) {
 		Title:     video.Title,
 		Artist:    video.Artist,
 		Evalution: video.Evalution,
-		VideoUrl:  config.VIDEO_QUERY_PATH + id + "/" + video.VideoUrl,
-		Avatar:    config.PHOTO_QUERY_PATH + id + "/" + video.Avatar,
+		VideoUrl:  config.AppConfig.VideoQueryPath + id + "/" + video.VideoUrl,
+		Avatar:    config.AppConfig.PhotoQueryPath + id + "/" + video.Avatar,
 	}, nil
 }

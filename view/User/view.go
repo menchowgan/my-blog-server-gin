@@ -70,7 +70,7 @@ func GerUserInfo(id string) (PsersonSimpleIinfo, error) {
 		for idx, url := range urls {
 			model := photos.PhotoInfo{
 				ID:  uint(idx + 1),
-				Url: config.PHOTO_QUERY_PATH + id + "/" + url,
+				Url: config.AppConfig.PhotoQueryPath + id + "/" + url,
 			}
 			imgUrls = append(imgUrls, model)
 		}
@@ -89,7 +89,7 @@ func GerUserInfo(id string) (PsersonSimpleIinfo, error) {
 		Fans:               user.Fans,
 		Photos:             imgUrls,
 		ArticleSimpleInfos: articleSIs,
-		Avatar:             config.PHOTO_QUERY_PATH + strconv.Itoa(int(user.ID)) + "/" + user.Avatar,
+		Avatar:             config.AppConfig.PhotoQueryPath + strconv.Itoa(int(user.ID)) + "/" + user.Avatar,
 	}
 
 	return u, nil
@@ -123,7 +123,7 @@ func SearchUserBrief(id string) (PersonInfoModel, error) {
 		Hobbies:  user.Hobbies,
 		Audios:   audioArray,
 		Videos:   videosArray,
-		Avatar:   config.PHOTO_QUERY_PATH + id + "/" + user.Avatar,
+		Avatar:   config.AppConfig.PhotoQueryPath + id + "/" + user.Avatar,
 	}
 
 	return u, nil
@@ -137,7 +137,7 @@ func getArticleSimpleInfo(id string, articles []model.Articles) []article.Articl
 				ID:     int64(a.ID),
 				Title:  a.Title,
 				UserId: a.UserId,
-				ImgUrl: config.PHOTO_QUERY_PATH + id + "/article/" + a.ImgUrl,
+				ImgUrl: config.AppConfig.PhotoQueryPath + id + "/article/" + a.ImgUrl,
 				Brief:  a.Brief,
 				Date:   a.CreatedAt,
 			})
@@ -163,7 +163,7 @@ func GetUserAllInfo(id string) (UserEnrollModel, error) {
 		Hobbies:   user.Hobbies,
 		Evaluate:  int(user.Evaluate),
 		Brief:     user.Brief,
-		Avatar:    config.PHOTO_QUERY_PATH + id + "/" + user.Avatar,
+		Avatar:    config.AppConfig.PhotoQueryPath + id + "/" + user.Avatar,
 	}, nil
 }
 

@@ -139,7 +139,7 @@ func savePhotoFile(c *gin.Context, file *multipart.FileHeader) error {
 			"errno":   0,
 			"success": true,
 			"data": articleUploadResponse{
-				Url:  config.PHOTO_QUERY_PATH + userid + "/article/" + file.Filename,
+				Url:  config.AppConfig.PhotoQueryPath + userid + "/article/" + file.Filename,
 				Alt:  file.Filename,
 				Href: file.Filename,
 			},
@@ -170,7 +170,7 @@ func saveVideo(c *gin.Context, file *multipart.FileHeader) error {
 		"errno":   0,
 		"success": true,
 		"data": articleUploadResponse{
-			Url: config.VIDEO_QUERY_PATH + userid + "/article/" + file.Filename,
+			Url: config.AppConfig.VideoQueryPath + userid + "/article/" + file.Filename,
 		},
 	})
 	return nil
@@ -180,7 +180,7 @@ func articlePhotoUpload(c *gin.Context, file *multipart.FileHeader) (string, err
 	userid := c.Param("userid")
 	log.Println("photo upload user id: ", userid)
 	folderName := "article"
-	folderPath := filepath.Join(config.PHOTO_PATH, userid, folderName)
+	folderPath := filepath.Join(config.AppConfig.PhotoPath, userid, folderName)
 	if _, err := os.Stat(folderPath); os.IsNotExist(err) {
 		os.Mkdir(folderPath, 0777)
 		os.Chmod(folderPath, 0777)
@@ -201,7 +201,7 @@ func articlePhotoUpload(c *gin.Context, file *multipart.FileHeader) (string, err
 func articleVideoUpload(c *gin.Context, file *multipart.FileHeader) (string, error) {
 	userid := c.Param("userid")
 	folderName := "article"
-	folderPath := filepath.Join(config.VIDEO_PATH, userid, folderName)
+	folderPath := filepath.Join(config.AppConfig.VideoPath, userid, folderName)
 	if _, err := os.Stat(folderPath); os.IsNotExist(err) {
 		os.Mkdir(folderPath, 0777)
 		os.Chmod(folderPath, 0777)
